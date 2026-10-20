@@ -16,7 +16,8 @@ import {
   Phone,
   Mail,
   MapPin,
-  Briefcase
+  Briefcase,
+  ShieldCheck
 } from 'lucide-react';
 import PressCard from '@/components/PressCard';
 import LFFLogo from '@/components/LFFLogo';
@@ -45,6 +46,7 @@ export default function RegisterPage() {
 
   const [photoPreview, setPhotoPreview] = useState('');
   const [docName, setDocName] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successData, setSuccessData] = useState(null);
@@ -105,6 +107,11 @@ export default function RegisterPage() {
 
     if (!formData.documentUrl) {
       setErrorMessage('يرجى إرفاق صورة خطاب تكليف المؤسسة أو بطاقة العمل الإعلامي (إجباري لإحالة الطلب)');
+      return;
+    }
+
+    if (!agreedToTerms) {
+      setErrorMessage('يجب قراءة ضوابط اعتماد الصحفيين والمصورين والتعهد بالالتزام بها للمتابعة');
       return;
     }
 
@@ -519,17 +526,91 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Declaration & Submit Button */}
+            {/* 4. Official Terms & Regulations */}
             <div className="pt-4 border-t border-slate-800">
-              <label className="flex items-start gap-2 text-xs text-slate-400 cursor-pointer mb-6">
-                <input type="checkbox" required defaultChecked className="mt-0.5 rounded text-emerald-600 focus:ring-0" />
-                <span>أقر بأن جميع البيانات والمستندات المقدمة صحيحة وأتحمل المسؤولية القانونية حيال أي معلومات غير مطابقة.</span>
+              <div className="flex items-center gap-2 text-base font-bold text-white mb-3 pb-2 border-b border-slate-800">
+                <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                <span>4. ضوابط اعتماد الصحفيين والمصورين لتغطية مباريات الدوري الممتاز</span>
+              </div>
+
+              {/* Regulations Box */}
+              <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/90 shadow-inner mb-4">
+                <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span className="text-xs font-bold text-white">الموسم الرياضي 2026–2027</span>
+                  </div>
+                  <span className="text-[11px] text-emerald-400 font-semibold bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                    الاتحاد الليبي لكرة القدم
+                  </span>
+                </div>
+
+                <ul className="space-y-2.5 text-xs text-slate-300 pr-1 leading-relaxed">
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                    <span>الالتزام بلوائح الاتحاد الليبي لكرة القدم والضوابط المنظمة للمباريات.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                    <span>إبراز البطاقة الإعلامية وتعليقها على الصدر طوال فترة التغطية.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                    <span>التزام المصورين بارتداء الغلالات أو السترات المخصصة والمميزة لهم.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                    <span>التقيد بالأماكن المخصصة للصحفيين والمصورين وعدم تجاوزها.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                    <span>عدم دخول أرضية الملعب أو المناطق المحظورة إلا بإذن مسبق.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                    <span>عدم إعاقة سير المباريات أو عمل اللاعبين والحكام والأجهزة الفنية والتنظيمية.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                    <span>الالتزام بتعليمات مراقب المباراة والمنسق الإعلامي والجهات المنظمة والأمنية.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                    <span>المحافظة على النظام والانضباط داخل الملعب واحترام حقوق بقية المعتمدين.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                    <span>مغادرة المناطق المخصصة للتغطية عند انتهاء المدة المحددة أو بطلب من الجهة المنظمة.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5 p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
+                    <span className="font-semibold">يحق للاتحاد الليبي لكرة القدم سحب بطاقة الاعتماد وإلغائها من أي صحفي أو مصور يخالف هذه الضوابط أو لا يلتزم بها.</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Mandatory Undertaking & Acknowledgment */}
+              <label className={`flex items-start gap-3 p-4 rounded-2xl border transition-all cursor-pointer mb-6 ${
+                agreedToTerms
+                  ? 'bg-emerald-950/20 border-emerald-500/60 shadow-sm shadow-emerald-500/10'
+                  : 'bg-slate-950 border-amber-500/40 hover:border-amber-400/70'
+              }`}>
+                <input
+                  type="checkbox"
+                  required
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="mt-1 w-4 h-4 rounded text-emerald-600 focus:ring-0 focus:ring-offset-0 bg-slate-900 border-slate-700 cursor-pointer"
+                />
+                <span className="text-xs font-semibold text-slate-100 leading-relaxed">
+                  أقرّ باطلاعي على الضوابط المذكورة أعلاه، وأتعهد بالالتزام بها طوال فترة اعتمادي لتغطية مباريات الدوري الممتاز للموسم الرياضي 2026–2027، وأوافق على اتخاذ الإجراءات المنصوص عليها بحقّي عند مخالفتها. <span className="text-rose-400 font-bold">*</span>
+                </span>
               </label>
 
               <button
                 type="submit"
-                disabled={submitting}
-                className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-base shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                disabled={submitting || !agreedToTerms}
+                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-base shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? (
                   <span>جاري حفظ البيانات...</span>
