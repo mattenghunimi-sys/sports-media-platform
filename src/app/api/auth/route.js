@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { findUserByCredentials, getUserById } from '@/lib/usersDb';
 
+export const dynamic = 'force-dynamic';
+
 const COOKIE_NAME = 'lff_admin_session';
 
 export async function GET(request) {

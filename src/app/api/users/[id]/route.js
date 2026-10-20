@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { updateUser, deleteUser } from '@/lib/usersDb';
 
+export const dynamic = 'force-dynamic';
+
 export async function PATCH(request, { params }) {
   try {
     const { id } = params;

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getJournalistById, updateJournalistStatus, deleteJournalist } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request, { params }) {
   try {
     const { id } = params;

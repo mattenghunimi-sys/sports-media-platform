@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getAllUsers, createUser } from '@/lib/usersDb';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const users = await getAllUsers();
