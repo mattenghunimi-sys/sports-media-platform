@@ -1,5 +1,18 @@
 import { supabaseAdmin } from './supabase';
 
+function mapUser(u) {
+  if (!u) return null;
+  return {
+    id: u.id,
+    username: u.username,
+    password: u.password,
+    displayName: u.display_name || u.displayName || u.username,
+    role: u.role,
+    createdAt: u.created_at || u.createdAt,
+    lastLogin: u.last_login || u.lastLogin,
+  };
+}
+
 // ========== GET ALL USERS ==========
 export async function getAllUsers() {
   const { data, error } = await supabaseAdmin
@@ -11,7 +24,7 @@ export async function getAllUsers() {
     console.error('Error fetching users:', error);
     return [];
   }
-  return data || [];
+  return (data || []).map(mapUser);
 }
 
 // ========== FIND BY CREDENTIALS ==========
@@ -21,10 +34,10 @@ export async function findUserByCredentials(username, password) {
     .select('*')
     .ilike('username', username.trim())
     .eq('password', password)
-    .single();
+    .maybeSingle();
 
-  if (error) return null;
-  return data || null;
+  if (error || !data) return null;
+  return mapUser(data);
 }
 
 // ========== GET BY ID ==========
@@ -33,20 +46,19 @@ export async function getUserById(id) {
     .from('users')
     .select('*')
     .eq('id', id)
-    .single();
+    .maybeSingle();
 
-  if (error) return null;
-  return data || null;
+  if (error || !data) return null;
+  return mapUser(data);
 }
 
 // ========== CREATE USER ==========
 export async function createUser({ username, password, displayName, role = 'ASSISTANT' }) {
-  // Check if username already exists
   const { data: existing } = await supabaseAdmin
     .from('users')
     .select('id')
     .ilike('username', username.trim())
-    .single();
+    .maybeSingle();
 
   if (existing) {
     throw new Error('اسم المستخدم مستخدم بالفعل، يرجى اختيار اسم مستخدم آخر');
@@ -71,7 +83,7 @@ export async function createUser({ username, password, displayName, role = 'ASSI
     console.error('Error creating user:', error);
     throw new Error(error.message);
   }
-  return data;
+  return mapUser(data);
 }
 
 // ========== UPDATE USER ==========
@@ -80,18 +92,17 @@ export async function updateUser(id, { username, password, displayName, role }) 
     .from('users')
     .select('*')
     .eq('id', id)
-    .single();
+    .maybeSingle();
 
   if (fetchError || !current) return null;
 
-  // Check unique username if changed
   if (username && username.trim().toLowerCase() !== current.username.toLowerCase()) {
     const { data: existing } = await supabaseAdmin
       .from('users')
       .select('id')
       .ilike('username', username.trim())
       .neq('id', id)
-      .single();
+      .maybeSingle();
 
     if (existing) {
       throw new Error('اسم المستخدم الجديد مستخدم بالفعل لحساب آخر');
@@ -115,7 +126,7 @@ export async function updateUser(id, { username, password, displayName, role }) 
     console.error('Error updating user:', error);
     return null;
   }
-  return data;
+  return mapUser(data);
 }
 
 // ========== DELETE USER ==========

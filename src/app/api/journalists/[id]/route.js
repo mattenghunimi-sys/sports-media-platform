@@ -12,6 +12,7 @@ export async function GET(request, { params }) {
 
     return NextResponse.json({ success: true, data: journalist });
   } catch (error) {
+    console.error('API GET single journalist error:', error);
     return NextResponse.json({ success: false, error: 'خطأ في جلب بيانات الإعلامي' }, { status: 500 });
   }
 }
@@ -38,7 +39,8 @@ export async function PATCH(request, { params }) {
       data: updated
     });
   } catch (error) {
-    return NextResponse.json({ success: false, error: 'تعذر تحديث الحالة' }, { status: 500 });
+    console.error('API PATCH journalist error:', error);
+    return NextResponse.json({ success: false, error: error.message || 'تعذر تحديث الحالة' }, { status: 500 });
   }
 }
 
@@ -53,6 +55,7 @@ export async function DELETE(request, { params }) {
 
     return NextResponse.json({ success: true, message: 'تم حذف السجل بنجاح' });
   } catch (error) {
-    return NextResponse.json({ success: false, error: 'تعذر حذف السجل' }, { status: 500 });
+    console.error('API DELETE journalist error:', error);
+    return NextResponse.json({ success: false, error: error.message || 'تعذر حذف السجل' }, { status: 500 });
   }
 }

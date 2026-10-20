@@ -31,11 +31,12 @@ export async function PATCH(request, { params }) {
       data: {
         id: updated.id,
         username: updated.username,
-        displayName: updated.display_name,
+        displayName: updated.displayName,
         role: updated.role
       }
     });
   } catch (err) {
+    console.error('API PATCH user error:', err);
     return NextResponse.json({ success: false, error: err.message || 'تعذر التحديث' }, { status: 400 });
   }
 }
@@ -54,6 +55,7 @@ export async function DELETE(request, { params }) {
       message: 'تم حذف حساب المستخدم بنجاح'
     });
   } catch (err) {
+    console.error('API DELETE user error:', err);
     return NextResponse.json({ success: false, error: err.message || 'تعذر الحذف' }, { status: 400 });
   }
 }

@@ -1,5 +1,35 @@
 import { supabaseAdmin } from './supabase';
 
+function mapToCamel(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    accreditationCode: row.accreditation_code,
+    fullName: row.full_name,
+    nationalId: row.national_id,
+    mediaOutlet: row.media_outlet,
+    outletType: row.outlet_type,
+    role: row.role,
+    coverageType: row.coverage_type,
+    phone: row.phone,
+    email: row.email,
+    city: row.city,
+    country: row.country,
+    experienceYears: row.experience_years,
+    syndicateNumber: row.syndicate_number,
+    photoUrl: row.photo_url,
+    documentUrl: row.document_url,
+    status: row.status,
+    issueDate: row.issue_date,
+    expiryDate: row.expiry_date,
+    bloodType: row.blood_type,
+    zoneAccess: row.zone_access,
+    reviewNotes: row.review_notes,
+    createdAt: row.created_at,
+    approvedAt: row.approved_at,
+  };
+}
+
 // ========== GET ALL ==========
 export async function getAllJournalists() {
   const { data, error } = await supabaseAdmin
@@ -11,7 +41,7 @@ export async function getAllJournalists() {
     console.error('Error fetching journalists:', error);
     return [];
   }
-  return data || [];
+  return (data || []).map(mapToCamel);
 }
 
 // ========== GET BY ID ==========
@@ -20,20 +50,20 @@ export async function getJournalistById(id) {
     .from('journalists')
     .select('*')
     .or(`id.eq.${id},accreditation_code.eq.${id},national_id.eq.${id}`)
-    .single();
+    .maybeSingle();
 
-  if (error) return null;
-  return data || null;
+  if (error || !data) return null;
+  return mapToCamel(data);
 }
 
 // ========== CREATE ==========
 export async function createJournalist(formData) {
   const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-  const id = `smp-${Date.now()}`;
+  const id = `lff-2026-${randomSuffix}`;
 
   const newJournalist = {
     id,
-    accreditation_code: `SMA-2026-${randomSuffix}`,
+    accreditation_code: `LFF-2026-${randomSuffix}`,
     full_name: formData.fullName || '',
     national_id: formData.nationalId || '',
     media_outlet: formData.mediaOutlet || '',
@@ -49,8 +79,8 @@ export async function createJournalist(formData) {
     photo_url: formData.photoUrl || '',
     document_url: formData.documentUrl || '',
     status: 'PENDING',
-    issue_date: null,
-    expiry_date: null,
+    issue_date: '',
+    expiry_date: '',
     blood_type: formData.bloodType || 'غير محدد',
     zone_access: 'MEDIA CENTRE - PRESS BOX',
     review_notes: '',
@@ -67,7 +97,7 @@ export async function createJournalist(formData) {
     console.error('Error creating journalist:', error);
     throw new Error(error.message);
   }
-  return data;
+  return mapToCamel(data);
 }
 
 // ========== UPDATE STATUS ==========
@@ -75,14 +105,13 @@ export async function updateJournalistStatus(id, { status, reviewNotes, zoneAcce
   const today = new Date().toISOString().split('T')[0];
   const nextYear = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-  // Get current data first
-  const { data: current } = await supabaseAdmin
+  const { data: current, error: fetchError } = await supabaseAdmin
     .from('journalists')
     .select('*')
     .eq('id', id)
-    .single();
+    .maybeSingle();
 
-  if (!current) return null;
+  if (fetchError || !current) return null;
 
   const updates = {
     status: status || current.status,
@@ -105,7 +134,7 @@ export async function updateJournalistStatus(id, { status, reviewNotes, zoneAcce
     console.error('Error updating journalist:', error);
     return null;
   }
-  return data;
+  return mapToCamel(data);
 }
 
 // ========== DELETE ==========

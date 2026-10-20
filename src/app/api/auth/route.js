@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { findUserByCredentials, getUserById, getAllUsers } from '@/lib/usersDb';
+import { findUserByCredentials, getUserById } from '@/lib/usersDb';
 
 const COOKIE_NAME = 'lff_admin_session';
 
@@ -12,7 +12,7 @@ export async function GET(request) {
   try {
     const rawData = Buffer.from(session.value, 'base64').toString('utf-8');
     const parsed = JSON.parse(rawData);
-    const user = getUserById(parsed.userId);
+    const user = await getUserById(parsed.userId);
 
     if (!user) {
       return NextResponse.json({ authenticated: false });
@@ -23,7 +23,7 @@ export async function GET(request) {
       user: {
         id: user.id,
         username: user.username,
-        displayName: user.displayName,
+        displayName: user.display_name || user.username,
         role: user.role
       }
     });
@@ -44,7 +44,7 @@ export async function POST(request) {
       );
     }
 
-    const user = findUserByCredentials(username, password);
+    const user = await findUserByCredentials(username, password);
 
     if (!user) {
       return NextResponse.json(
@@ -68,7 +68,7 @@ export async function POST(request) {
       user: {
         id: user.id,
         username: user.username,
-        displayName: user.displayName,
+        displayName: user.display_name || user.username,
         role: user.role
       }
     });

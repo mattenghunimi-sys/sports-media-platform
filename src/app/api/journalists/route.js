@@ -16,10 +16,10 @@ export async function GET(request) {
     if (query) {
       const q = query.trim().toLowerCase();
       list = list.filter(j =>
-        j.full_name?.toLowerCase().includes(q) ||
-        j.media_outlet?.toLowerCase().includes(q) ||
-        j.accreditation_code?.toLowerCase().includes(q) ||
-        j.national_id?.includes(q) ||
+        j.fullName?.toLowerCase().includes(q) ||
+        j.mediaOutlet?.toLowerCase().includes(q) ||
+        j.accreditationCode?.toLowerCase().includes(q) ||
+        j.nationalId?.includes(q) ||
         j.phone?.includes(q)
       );
     }
@@ -52,6 +52,6 @@ export async function POST(request) {
     }, { status: 201 });
   } catch (error) {
     console.error('API POST journalist error:', error);
-    return NextResponse.json({ success: false, error: 'تعذر حفظ البيانات' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message || 'تعذر حفظ البيانات' }, { status: 500 });
   }
 }
