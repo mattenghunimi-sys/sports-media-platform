@@ -29,7 +29,7 @@ export async function GET(request) {
     return NextResponse.json({ success: true, count: list.length, data: list });
   } catch (error) {
     console.error('API GET journalists error:', error);
-    return NextResponse.json({ success: false, error: 'حدث خطأ في استرجاع البيانات' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message || 'حدث خطأ في استرجاع البيانات', stack: error.stack }, { status: 500 });
   }
 }
 
