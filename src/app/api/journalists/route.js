@@ -7,7 +7,7 @@ export async function GET(request) {
     const status = searchParams.get('status');
     const query = searchParams.get('query');
 
-    let list = getAllJournalists();
+    let list = await getAllJournalists();
 
     if (status && status !== 'ALL') {
       list = list.filter(j => j.status === status);
@@ -15,11 +15,11 @@ export async function GET(request) {
 
     if (query) {
       const q = query.trim().toLowerCase();
-      list = list.filter(j => 
-        j.fullName?.toLowerCase().includes(q) ||
-        j.mediaOutlet?.toLowerCase().includes(q) ||
-        j.accreditationCode?.toLowerCase().includes(q) ||
-        j.nationalId?.includes(q) ||
+      list = list.filter(j =>
+        j.full_name?.toLowerCase().includes(q) ||
+        j.media_outlet?.toLowerCase().includes(q) ||
+        j.accreditation_code?.toLowerCase().includes(q) ||
+        j.national_id?.includes(q) ||
         j.phone?.includes(q)
       );
     }
@@ -43,7 +43,7 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    const created = createJournalist(body);
+    const created = await createJournalist(body);
 
     return NextResponse.json({
       success: true,

@@ -68,13 +68,13 @@
     "syndicateNumber": "",
     "photoUrl": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80",
     "documentUrl": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=900&q=80",
-    "status": "PENDING",
-    "issueDate": "",
-    "expiryDate": "",
+    "status": "APPROVED",
+    "issueDate": "2026-10-20",
+    "expiryDate": "2027-10-20",
     "bloodType": "B+",
     "zoneAccess": "MEDIA CENTRE - PRESS BOX",
     "reviewNotes": "بانتظار تدقيق تفويض الصحيفة لموسم 2026.",
     "createdAt": "2026-02-01T12:00:00.000Z",
-    "approvedAt": null
+    "approvedAt": "2026-10-20T20:16:00.479Z"
   }
 ]

@@ -3,15 +3,15 @@ import { getAllUsers, createUser } from '@/lib/usersDb';
 
 export async function GET() {
   try {
-    const users = getAllUsers();
-    // Return sanitized users
+    const users = await getAllUsers();
+    // Return sanitized users (no passwords)
     const sanitized = users.map(u => ({
       id: u.id,
       username: u.username,
-      displayName: u.displayName,
+      displayName: u.display_name,
       role: u.role,
-      createdAt: u.createdAt,
-      lastLogin: u.lastLogin
+      createdAt: u.created_at,
+      lastLogin: u.last_login
     }));
 
     return NextResponse.json({ success: true, data: sanitized });
@@ -39,7 +39,7 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    const newUser = createUser({
+    const newUser = await createUser({
       username,
       password,
       displayName: displayName || username,
@@ -52,9 +52,9 @@ export async function POST(request) {
       data: {
         id: newUser.id,
         username: newUser.username,
-        displayName: newUser.displayName,
+        displayName: newUser.display_name,
         role: newUser.role,
-        createdAt: newUser.createdAt
+        createdAt: newUser.created_at
       }
     }, { status: 201 });
   } catch (err) {

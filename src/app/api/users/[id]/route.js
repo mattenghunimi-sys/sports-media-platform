@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { updateUser, deleteUser, getUserById } from '@/lib/usersDb';
+import { updateUser, deleteUser } from '@/lib/usersDb';
 
 export async function PATCH(request, { params }) {
   try {
@@ -14,7 +14,7 @@ export async function PATCH(request, { params }) {
       }, { status: 400 });
     }
 
-    const updated = updateUser(id, {
+    const updated = await updateUser(id, {
       username,
       password,
       displayName,
@@ -31,7 +31,7 @@ export async function PATCH(request, { params }) {
       data: {
         id: updated.id,
         username: updated.username,
-        displayName: updated.displayName,
+        displayName: updated.display_name,
         role: updated.role
       }
     });
@@ -43,7 +43,7 @@ export async function PATCH(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     const { id } = params;
-    const deleted = deleteUser(id);
+    const deleted = await deleteUser(id);
 
     if (!deleted) {
       return NextResponse.json({ success: false, error: 'المستخدم غير موجود' }, { status: 404 });

@@ -1,61 +1,54 @@
-import fs from 'fs';
-import path from 'path';
+import { supabaseAdmin } from './supabase';
 
-const dataDir = path.join(process.cwd(), 'data');
-const usersFile = path.join(dataDir, 'users.json');
+// ========== GET ALL USERS ==========
+export async function getAllUsers() {
+  const { data, error } = await supabaseAdmin
+    .from('users')
+    .select('*')
+    .order('created_at', { ascending: true });
 
-const INITIAL_USERS = [
-  {
-    id: "usr-super-admin",
-    username: "admin",
-    password: "lff@2026",
-    displayName: "مدير المنظومة الرئيسي",
-    role: "SUPER_ADMIN", // SUPER_ADMIN or ASSISTANT
-    createdAt: "2026-01-01T00:00:00.000Z",
-    lastLogin: null
-  }
-];
-
-function ensureUsersDb() {
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-  if (!fs.existsSync(usersFile)) {
-    fs.writeFileSync(usersFile, JSON.stringify(INITIAL_USERS, null, 2), 'utf-8');
-  }
-}
-
-export function getAllUsers() {
-  ensureUsersDb();
-  try {
-    const data = fs.readFileSync(usersFile, 'utf-8');
-    return JSON.parse(data);
-  } catch (err) {
-    console.error('Error reading users database:', err);
+  if (error) {
+    console.error('Error fetching users:', error);
     return [];
   }
+  return data || [];
 }
 
-export function saveUsers(users) {
-  ensureUsersDb();
-  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+// ========== FIND BY CREDENTIALS ==========
+export async function findUserByCredentials(username, password) {
+  const { data, error } = await supabaseAdmin
+    .from('users')
+    .select('*')
+    .ilike('username', username.trim())
+    .eq('password', password)
+    .single();
+
+  if (error) return null;
+  return data || null;
 }
 
-export function findUserByCredentials(username, password) {
-  const users = getAllUsers();
-  return users.find(u => u.username.toLowerCase() === username.toLowerCase().trim() && u.password === password) || null;
+// ========== GET BY ID ==========
+export async function getUserById(id) {
+  const { data, error } = await supabaseAdmin
+    .from('users')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) return null;
+  return data || null;
 }
 
-export function getUserById(id) {
-  const users = getAllUsers();
-  return users.find(u => u.id === id) || null;
-}
-
-export function createUser({ username, password, displayName, role = 'ASSISTANT' }) {
-  const users = getAllUsers();
-  
+// ========== CREATE USER ==========
+export async function createUser({ username, password, displayName, role = 'ASSISTANT' }) {
   // Check if username already exists
-  if (users.some(u => u.username.toLowerCase() === username.toLowerCase().trim())) {
+  const { data: existing } = await supabaseAdmin
+    .from('users')
+    .select('id')
+    .ilike('username', username.trim())
+    .single();
+
+  if (existing) {
     throw new Error('اسم المستخدم مستخدم بالفعل، يرجى اختيار اسم مستخدم آخر');
   }
 
@@ -63,53 +56,86 @@ export function createUser({ username, password, displayName, role = 'ASSISTANT'
     id: `usr-${Date.now()}`,
     username: username.trim(),
     password: password.trim(),
-    displayName: displayName || username,
+    display_name: displayName || username,
     role: role || 'ASSISTANT',
-    createdAt: new Date().toISOString(),
-    lastLogin: null
+    last_login: null,
   };
 
-  users.push(newUser);
-  saveUsers(users);
-  return newUser;
+  const { data, error } = await supabaseAdmin
+    .from('users')
+    .insert([newUser])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating user:', error);
+    throw new Error(error.message);
+  }
+  return data;
 }
 
-export function updateUser(id, { username, password, displayName, role }) {
-  const users = getAllUsers();
-  const index = users.findIndex(u => u.id === id);
-  if (index === -1) return null;
+// ========== UPDATE USER ==========
+export async function updateUser(id, { username, password, displayName, role }) {
+  const { data: current, error: fetchError } = await supabaseAdmin
+    .from('users')
+    .select('*')
+    .eq('id', id)
+    .single();
 
-  // Check unique username if username changed
-  if (username && username.trim().toLowerCase() !== users[index].username.toLowerCase()) {
-    if (users.some(u => u.id !== id && u.username.toLowerCase() === username.trim().toLowerCase())) {
+  if (fetchError || !current) return null;
+
+  // Check unique username if changed
+  if (username && username.trim().toLowerCase() !== current.username.toLowerCase()) {
+    const { data: existing } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .ilike('username', username.trim())
+      .neq('id', id)
+      .single();
+
+    if (existing) {
       throw new Error('اسم المستخدم الجديد مستخدم بالفعل لحساب آخر');
     }
-    users[index].username = username.trim();
   }
 
-  if (password && password.trim()) {
-    users[index].password = password.trim();
-  }
+  const updates = {};
+  if (username && username.trim()) updates.username = username.trim();
+  if (password && password.trim()) updates.password = password.trim();
+  if (displayName) updates.display_name = displayName;
+  if (role) updates.role = role;
 
-  if (displayName) {
-    users[index].displayName = displayName;
-  }
+  const { data, error } = await supabaseAdmin
+    .from('users')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
 
-  if (role) {
-    users[index].role = role;
+  if (error) {
+    console.error('Error updating user:', error);
+    return null;
   }
-
-  saveUsers(users);
-  return users[index];
+  return data;
 }
 
-export function deleteUser(id) {
-  const users = getAllUsers();
-  if (users.length <= 1) {
+// ========== DELETE USER ==========
+export async function deleteUser(id) {
+  const { count } = await supabaseAdmin
+    .from('users')
+    .select('*', { count: 'exact', head: true });
+
+  if (count <= 1) {
     throw new Error('لا يمكن حذف المستخدم الأخير في المنظومة');
   }
-  const filtered = users.filter(u => u.id !== id);
-  if (filtered.length === users.length) return false;
-  saveUsers(filtered);
+
+  const { error } = await supabaseAdmin
+    .from('users')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting user:', error);
+    return false;
+  }
   return true;
 }

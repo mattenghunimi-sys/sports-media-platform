@@ -4,7 +4,7 @@ import { getJournalistById, updateJournalistStatus, deleteJournalist } from '@/l
 export async function GET(request, { params }) {
   try {
     const { id } = params;
-    const journalist = getJournalistById(id);
+    const journalist = await getJournalistById(id);
 
     if (!journalist) {
       return NextResponse.json({ success: false, error: 'لم يتم العثور على الإعلامي المطلوب' }, { status: 404 });
@@ -21,7 +21,7 @@ export async function PATCH(request, { params }) {
     const { id } = params;
     const body = await request.json();
 
-    const updated = updateJournalistStatus(id, {
+    const updated = await updateJournalistStatus(id, {
       status: body.status,
       reviewNotes: body.reviewNotes,
       zoneAccess: body.zoneAccess,
@@ -45,7 +45,7 @@ export async function PATCH(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     const { id } = params;
-    const deleted = deleteJournalist(id);
+    const deleted = await deleteJournalist(id);
 
     if (!deleted) {
       return NextResponse.json({ success: false, error: 'السجل غير موجود' }, { status: 404 });
