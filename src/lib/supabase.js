@@ -1,24 +1,30 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Robust URL normalization: handles missing https://, trailing slashes, and /rest/v1
+const HARDCODED_URL = 'https://yibhikcjxhxtugiwfqks.supabase.co';
+
 function getValidSupabaseUrl() {
   const envUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (typeof envUrl === 'string' && envUrl.trim().length > 0) {
-    let cleaned = envUrl.trim().replace(/^["']|["']$/g, '');
-    cleaned = cleaned.replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
-    if (cleaned.startsWith('http://') || cleaned.startsWith('https://')) {
-      return cleaned;
-    }
-    if (cleaned.includes('supabase.co')) {
-      return `https://${cleaned}`;
+    try {
+      const cleaned = envUrl.trim().replace(/["']/g, '');
+      const withHttp = cleaned.startsWith('http') ? cleaned : `https://${cleaned}`;
+      const parsed = new URL(withHttp);
+      if (parsed.hostname && parsed.hostname.includes('supabase.co')) {
+        return `https://${parsed.hostname}`;
+      }
+    } catch {
+      // Fallback below
     }
   }
-  return 'https://yibhikcjxhxtugiwfqks.supabase.co';
+  return HARDCODED_URL;
 }
 
 function getValidKey(envKey, fallback) {
-  if (typeof envKey === 'string' && envKey.trim().length > 20) {
-    return envKey.trim().replace(/^["']|["']$/g, '');
+  if (typeof envKey === 'string') {
+    const cleaned = envKey.trim().replace(/["']/g, '');
+    if (cleaned.length > 20) {
+      return cleaned;
+    }
   }
   return fallback;
 }
@@ -30,7 +36,6 @@ let _adminClient = null;
 
 export function getAdminClient() {
   if (!_adminClient) {
-    // Polyfill WebSocket in Node runtime so @supabase/supabase-js never throws
     if (typeof globalThis.WebSocket === 'undefined') {
       globalThis.WebSocket = class DummyWebSocket {};
     }
