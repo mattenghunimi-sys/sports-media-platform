@@ -21,7 +21,9 @@ import {
   RotateCw,
   FileCheck2,
   Maximize2,
-  X
+  X,
+  Ban,
+  AlertTriangle
 } from 'lucide-react';
 import PressCard from '@/components/PressCard';
 
@@ -36,6 +38,47 @@ export default function JournalistProfilePage() {
   const [copied, setCopied] = useState(false);
   const [cardSide, setCardSide] = useState('front'); // 'front' or 'back'
   const [showDocModal, setShowDocModal] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
+
+  const handleToggleRevoke = async (newStatus) => {
+    const isRevoking = newStatus === 'REVOKED';
+    const confirmPrompt = isRevoking
+      ? 'هل أنت متأكد من سحب بطاقة الاعتماد وإيقاف صلاحيتها فوراً؟'
+      : 'هل أنت متأكد من إلغاء السحب واستعادة صلاحية البطاقة (بعد انقضاء العقوبة أو التعهد بالالتزام)؟';
+    
+    if (!confirm(confirmPrompt)) return;
+
+    setUpdatingStatus(true);
+    setStatusMessage('');
+
+    try {
+      const res = await fetch(`/api/journalists/${journalist.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: newStatus,
+          reviewNotes: isRevoking
+            ? 'تم سحب بطاقة الاعتماد رسمياً بقرار الاتحاد الليبي لكرة القدم لمخالفة ضوابط التغطية.'
+            : 'تم إلغاء سحب البطاقة واستعادة صلاحيتها بعد انقضاء العقوبة والتعهد بالالتزام بالضوابط.',
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setJournalist(data.data);
+        setStatusMessage(isRevoking ? 'تم سحب البطاقة بنجاح وإيقاف الصلاحية' : 'تم إلغاء السحب وتفعيل البطاقة بنجاح');
+        setTimeout(() => setStatusMessage(''), 4000);
+      } else {
+        alert(data.error || 'فشل تحديث حالة البطاقة');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('حدث خطأ أثناء الاتصال بالخادم');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -93,11 +136,25 @@ export default function JournalistProfilePage() {
   }
 
   const isApproved = journalist.status === 'APPROVED';
+  const isRevoked = journalist.status === 'REVOKED';
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+      {/* Status Toast Notification */}
+      {statusMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-emerald-600 text-white px-6 py-3 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-2 animate-in slide-in-from-bottom-4">
+          <CheckCircle2 className="w-5 h-5" />
+          {statusMessage}
+        </div>
+      )}
+
       {/* Header Banner */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl mb-10">
+      <div className={`border rounded-3xl p-6 sm:p-8 shadow-xl mb-6 transition-all ${
+        isRevoked 
+          ? 'bg-rose-950/40 border-rose-800/60' 
+          : 'bg-slate-900 border-slate-800'
+      }`}>
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Identity Info */}
           <div className="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-right">
@@ -105,10 +162,14 @@ export default function JournalistProfilePage() {
               <img
                 src={journalist.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'}
                 alt={journalist.fullName}
-                className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 border-emerald-500 shadow-xl"
+                className={`w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 shadow-xl transition-all ${
+                  isRevoked ? 'border-rose-500 grayscale' : 'border-emerald-500'
+                }`}
               />
               <div className="absolute -bottom-2 -left-2 bg-slate-950 p-1 rounded-full border border-slate-800">
-                {isApproved ? (
+                {isRevoked ? (
+                  <Ban className="w-6 h-6 text-rose-400" />
+                ) : isApproved ? (
                   <CheckCircle2 className="w-6 h-6 text-emerald-400" />
                 ) : (
                   <Clock className="w-6 h-6 text-amber-400" />
@@ -120,11 +181,13 @@ export default function JournalistProfilePage() {
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1.5">
                 <h1 className="text-2xl sm:text-3xl font-black text-white">{journalist.fullName}</h1>
                 <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
-                  isApproved 
+                  isRevoked
+                    ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 animate-pulse'
+                    : isApproved 
                     ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' 
                     : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
                 }`}>
-                  {isApproved ? '✓ اعتماد رسمي معتمد' : '⏳ قيد المراجعة والاعتماد'}
+                  {isRevoked ? '🚫 البطاقة مسحوبة' : isApproved ? '✓ اعتماد رسمي معتمد' : '⏳ قيد المراجعة والاعتماد'}
                 </span>
               </div>
 
@@ -157,9 +220,46 @@ export default function JournalistProfilePage() {
               <Share2 className="w-4 h-4 text-teal-400" />
               <span>{copied ? 'تم نسخ الرابط!' : 'مشاركة الرابط'}</span>
             </button>
+
+            {/* Revoke / Unrevoke Button */}
+            {isRevoked ? (
+              <button
+                onClick={() => handleToggleRevoke('APPROVED')}
+                disabled={updatingStatus}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-sm border border-emerald-500 transition-all disabled:opacity-60"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                <span>{updatingStatus ? 'جاري التحديث...' : 'إلغاء السحب وتفعيل البطاقة'}</span>
+              </button>
+            ) : isApproved ? (
+              <button
+                onClick={() => handleToggleRevoke('REVOKED')}
+                disabled={updatingStatus}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-rose-700 hover:bg-rose-600 text-white font-bold text-sm border border-rose-500/60 transition-all disabled:opacity-60"
+              >
+                <Ban className="w-4 h-4" />
+                <span>{updatingStatus ? 'جاري التحديث...' : 'سحب بطاقة الاعتماد'}</span>
+              </button>
+            ) : null}
           </div>
         </div>
       </div>
+
+      {/* REVOKED Warning Banner */}
+      {isRevoked && (
+        <div className="mb-8 p-5 bg-rose-950/50 border border-rose-500/60 rounded-2xl flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-rose-500/20 flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-7 h-7 text-rose-400" />
+          </div>
+          <div>
+            <p className="text-rose-300 font-black text-base mb-0.5">⛔ هذه البطاقة مسحوبة وموقوفة الصلاحية رسمياً</p>
+            <p className="text-rose-400/80 text-sm">
+              {journalist.reviewNotes || 'تم سحب بطاقة الاعتماد بقرار الاتحاد الليبي لكرة القدم.'}
+            </p>
+            <p className="text-rose-500/60 text-xs mt-1">لا تُقبل هذه البطاقة للدخول إلى الملاعب حتى يتم إلغاء السحب رسمياً.</p>
+          </div>
+        </div>
+      )}
 
       {/* Main Grid: Details + Badge Preview */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

@@ -35,6 +35,7 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
   } = journalist || {};
 
   const isApproved = status === 'APPROVED';
+  const isRevoked = status === 'REVOKED';
 
   // Generate live QR code for official verification page
   useEffect(() => {
@@ -106,24 +107,34 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
       {/* ======================================================== */}
       {!showBack ? (
         <div 
-          className="w-[380px] h-[710px] rounded-[32px] overflow-hidden relative flex flex-col justify-between text-white shadow-2xl transition-all border-[3px] border-amber-500/70"
+          className={`w-[380px] h-[710px] rounded-[32px] overflow-hidden relative flex flex-col justify-between text-white shadow-2xl transition-all border-[3px] ${
+            isRevoked ? 'border-rose-600' : 'border-amber-500/70'
+          }`}
           style={{
-            background: 'linear-gradient(180deg, #031c0e 0%, #06371c 30%, #052613 65%, #021208 100%)',
-            boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 35px rgba(217, 119, 6, 0.25)'
+            background: isRevoked
+              ? 'linear-gradient(180deg, #2b0404 0%, #570808 30%, #3d0505 65%, #1a0202 100%)'
+              : 'linear-gradient(180deg, #031c0e 0%, #06371c 30%, #052613 65%, #021208 100%)',
+            boxShadow: isRevoked
+              ? '0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 45px rgba(225, 29, 72, 0.45)'
+              : '0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 35px rgba(217, 119, 6, 0.25)'
           }}
         >
           {/* Subtle Security Guilloche Pattern Overlay */}
           <div 
             className="absolute inset-0 pointer-events-none opacity-[0.08]"
             style={{
-              backgroundImage: `radial-gradient(circle at 50% 50%, #f59e0b 1px, transparent 1px), radial-gradient(circle at 0% 0%, #10b981 1px, transparent 1px)`,
+              backgroundImage: isRevoked
+                ? `radial-gradient(circle at 50% 50%, #f43f5e 1px, transparent 1px), radial-gradient(circle at 0% 0%, #e11d48 1px, transparent 1px)`
+                : `radial-gradient(circle at 50% 50%, #f59e0b 1px, transparent 1px), radial-gradient(circle at 0% 0%, #10b981 1px, transparent 1px)`,
               backgroundSize: '16px 16px'
             }}
           ></div>
 
           {/* Top Lanyard Slot with Brass / Gold Metallic Ring */}
           <div className="pt-3 pb-0.5 flex justify-center relative z-20 shrink-0">
-            <div className="w-16 h-2.5 bg-slate-950 rounded-full border-2 border-amber-500/80 shadow-[inset_0_2px_4px_rgba(0,0,0,0.9)]"></div>
+            <div className={`w-16 h-2.5 bg-slate-950 rounded-full border-2 ${
+              isRevoked ? 'border-rose-500/90' : 'border-amber-500/80'
+            } shadow-[inset_0_2px_4px_rgba(0,0,0,0.9)]`}></div>
           </div>
 
           {/* ================= HEADER SECTION ================= */}
@@ -134,21 +145,34 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
             </div>
 
             {/* Federation Official Arabic Name */}
-            <h2 className="text-xl font-black text-amber-300 tracking-wide drop-shadow-md">
+            <h2 className={`text-xl font-black ${isRevoked ? 'text-rose-200' : 'text-amber-300'} tracking-wide drop-shadow-md`}>
               الاتحاد الليبي لكرة القدم
             </h2>
 
             {/* Sub-label in Arabic */}
-            <p className="text-[10px] font-bold text-emerald-200/90 tracking-wider mt-0.5">
+            <p className={`text-[10px] font-bold ${isRevoked ? 'text-rose-300/90' : 'text-emerald-200/90'} tracking-wider mt-0.5`}>
               الإدارة العامة للإعلام والتوثيق والاتصال
             </p>
 
             {/* Official Pass Ribbon */}
-            <div className="mt-1.5 py-1 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-slate-950 font-black text-xs shadow-lg flex items-center justify-between border border-amber-200">
+            <div className={`mt-1.5 py-1 px-4 rounded-xl font-black text-xs shadow-lg flex items-center justify-between border ${
+              isRevoked
+                ? 'bg-gradient-to-r from-rose-700 via-red-600 to-rose-700 text-white border-rose-300/50'
+                : 'bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-slate-950 border-amber-200'
+            }`}>
               <span className="text-[10px] tracking-tight">الموسم الرياضي 2026 / 2027</span>
               <span className="flex items-center gap-1 text-[11px]">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>بطاقة اعتماد إعلامي رسمي</span>
+                {isRevoked ? (
+                  <>
+                    <AlertCircle className="w-3.5 h-3.5 text-white" />
+                    <span>البطاقة مسحوبة • اعتماد موقوف</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>بطاقة اعتماد إعلامي رسمي</span>
+                  </>
+                )}
               </span>
             </div>
           </div>
@@ -157,13 +181,17 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
           <div className="px-5 flex flex-col items-center text-center relative z-10 flex-1 justify-center my-1">
             {/* Photo with Official Gold Double Frame & Watermark */}
             <div className="relative mb-2 shrink-0">
-              <div className="w-28 h-32 rounded-2xl p-1 bg-gradient-to-b from-amber-400 via-emerald-500 to-amber-600 shadow-2xl">
+              <div className={`w-28 h-32 rounded-2xl p-1 shadow-2xl ${
+                isRevoked
+                  ? 'bg-gradient-to-b from-rose-500 via-red-600 to-rose-800'
+                  : 'bg-gradient-to-b from-amber-400 via-emerald-500 to-amber-600'
+              }`}>
                 <div className="w-full h-full rounded-xl overflow-hidden bg-slate-900 relative border border-slate-950">
                   {photoUrl ? (
                     <img 
                       src={photoUrl} 
                       alt={fullName} 
-                      className="w-full h-full object-cover" 
+                      className={`w-full h-full object-cover ${isRevoked ? 'grayscale contrast-125' : ''}`} 
                     />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-900">
@@ -172,26 +200,55 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
                     </div>
                   )}
 
+                  {/* Red Revocation Stamp Across Photo */}
+                  {isRevoked && (
+                    <div className="absolute inset-0 bg-rose-950/60 backdrop-blur-[1px] flex items-center justify-center z-20">
+                      <div className="transform -rotate-12 bg-rose-600 border-2 border-white px-2.5 py-1 rounded shadow-2xl">
+                        <span className="text-white font-black text-xs tracking-wider block">
+                          البطاقة مسحوبة
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Security Hologram Ribbon Overlay */}
                   <div className="absolute inset-0 hologram-effect pointer-events-none opacity-30"></div>
                 </div>
               </div>
 
-              {/* Status Badge Pin (معتمد رسمياً) */}
-              <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap">
+              {/* Status Badge Pin */}
+              <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap z-20">
                 <span className={`px-3 py-0.5 rounded-full text-[10px] font-black shadow-xl border flex items-center gap-1 ${
-                  isApproved 
-                    ? 'bg-emerald-600 text-white border-emerald-300' 
-                    : 'bg-amber-600 text-white border-amber-300'
+                  isRevoked
+                    ? 'bg-rose-600 text-white border-rose-300 animate-pulse'
+                    : isApproved 
+                      ? 'bg-emerald-600 text-white border-emerald-300' 
+                      : 'bg-amber-600 text-white border-amber-300'
                 }`}>
-                  {isApproved ? <CheckCircle2 className="w-3 h-3 text-white" /> : <AlertCircle className="w-3 h-3 text-white" />}
-                  <span>{isApproved ? 'معتمد رسمياً' : 'قيد المراجعة'}</span>
+                  {isRevoked ? (
+                    <>
+                      <AlertCircle className="w-3 h-3 text-white" />
+                      <span>البطاقة مسحوبة</span>
+                    </>
+                  ) : isApproved ? (
+                    <>
+                      <CheckCircle2 className="w-3 h-3 text-white" />
+                      <span>معتمد رسمياً</span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="w-3 h-3 text-white" />
+                      <span>قيد المراجعة</span>
+                    </>
+                  )}
                 </span>
               </div>
             </div>
 
             {/* Category Ribbon Under Photo */}
-            <div className={`mt-1.5 py-0.5 px-3 rounded-lg bg-gradient-to-r ${roleBadge.color} font-black text-[10.5px] shadow-md flex items-center gap-1.5 border border-white/20 shrink-0`}>
+            <div className={`mt-1.5 py-0.5 px-3 rounded-lg font-black text-[10.5px] shadow-md flex items-center gap-1.5 border border-white/20 shrink-0 ${
+              isRevoked ? 'bg-slate-800 text-slate-300' : `bg-gradient-to-r ${roleBadge.color}`
+            }`}>
               {roleBadge.icon}
               <span>{role}</span>
             </div>
@@ -202,16 +259,24 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
             </h3>
 
             {/* Media Outlet Name */}
-            <div className="text-xs font-extrabold text-amber-300 mb-1.5 flex items-center gap-1.5 line-clamp-1">
+            <div className={`text-xs font-extrabold mb-1.5 flex items-center gap-1.5 line-clamp-1 ${
+              isRevoked ? 'text-rose-300' : 'text-amber-300'
+            }`}>
               <span>{mediaOutlet}</span>
-              <span className="text-emerald-400 text-[10px] font-normal">({outletType})</span>
+              <span className={`text-[10px] font-normal ${isRevoked ? 'text-slate-400' : 'text-emerald-400'}`}>({outletType})</span>
             </div>
 
             {/* Accreditation Info Box */}
-            <div className="w-full bg-slate-950/80 rounded-2xl p-2.5 border border-amber-500/30 text-right space-y-1 shadow-inner">
+            <div className={`w-full rounded-2xl p-2.5 text-right space-y-1 shadow-inner border ${
+              isRevoked
+                ? 'bg-rose-950/40 border-rose-600/50'
+                : 'bg-slate-950/80 border-amber-500/30'
+            }`}>
               <div className="flex items-center justify-between text-xs border-b border-white/10 pb-1">
                 <span className="text-slate-400 text-[10px]">رقم الاعتماد الصحفي:</span>
-                <span className="font-mono font-black text-amber-400 tracking-wider text-xs">
+                <span className={`font-mono font-black tracking-wider text-xs ${
+                  isRevoked ? 'text-rose-400 line-through' : 'text-amber-400'
+                }`}>
                   {accreditationCode}
                 </span>
               </div>
@@ -224,9 +289,11 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
               </div>
 
               <div className="flex items-center justify-between text-xs border-t border-white/10 pt-1">
-                <span className="text-slate-400 text-[10px]">صلاحية البطاقة:</span>
-                <span className="text-emerald-400 text-[10px] font-bold">
-                  حتى {expiryDate || 'نهاية موسم 2026 / 2027'}
+                <span className="text-slate-400 text-[10px]">حالة وسريان البطاقة:</span>
+                <span className={`text-[10px] font-bold ${
+                  isRevoked ? 'text-rose-400' : 'text-emerald-400'
+                }`}>
+                  {isRevoked ? 'ملغاة ومسحوبة بقرار الاتحاد' : `حتى ${expiryDate || 'نهاية موسم 2026 / 2027'}`}
                 </span>
               </div>
             </div>
@@ -237,35 +304,53 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
                 المناطق المصرح بدخولها في الملاعب:
               </span>
               <div className="flex flex-wrap gap-1 justify-center">
-                {getZoneChips().map((zone, idx) => (
-                  <span 
-                    key={idx}
-                    className="text-[9px] font-black px-2 py-0.5 rounded-md bg-emerald-900/90 text-emerald-200 border border-emerald-500/40 shadow-sm"
-                  >
-                    ✓ {zone}
+                {isRevoked ? (
+                  <span className="text-[9px] font-black px-3 py-1 rounded-md bg-rose-950/90 text-rose-300 border border-rose-600/60 shadow-sm flex items-center gap-1">
+                    <span>✕ غير مصرح بالدخول (البطاقة مسحوبة رسمياً)</span>
                   </span>
-                ))}
+                ) : (
+                  getZoneChips().map((zone, idx) => (
+                    <span 
+                      key={idx}
+                      className="text-[9px] font-black px-2 py-0.5 rounded-md bg-emerald-900/90 text-emerald-200 border border-emerald-500/40 shadow-sm"
+                    >
+                      ✓ {zone}
+                    </span>
+                  ))
+                )}
               </div>
             </div>
           </div>
 
           {/* ================= FOOTER: QR CODE & DIGITAL VERIFICATION ================= */}
-          <div className="bg-slate-950 border-t-2 border-amber-500/60 px-4 py-3 flex items-center justify-between relative z-10 shrink-0">
+          <div className={`bg-slate-950 border-t-2 ${
+            isRevoked ? 'border-rose-500/80' : 'border-amber-500/60'
+          } px-4 py-3 flex items-center justify-between relative z-10 shrink-0`}>
             <div className="text-right flex-1 pl-3">
-              <div className="flex items-center gap-1 text-amber-400 font-black text-[10.5px] mb-0.5">
-                <Award className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <span>الوثيقة الرسمية الإلكترونية المعتمدة</span>
+              <div className={`flex items-center gap-1 font-black text-[10.5px] mb-0.5 ${
+                isRevoked ? 'text-rose-400' : 'text-amber-400'
+              }`}>
+                {isRevoked ? (
+                  <AlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                ) : (
+                  <Award className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                )}
+                <span>{isRevoked ? '⚠️ بطاقة مسحوبة وملغاة رسمياً' : 'الوثيقة الرسمية الإلكترونية المعتمدة'}</span>
               </div>
-              <p className="text-[9px] text-slate-300 leading-tight">
-                امسح الرمز للتحقق الفوري من صحة سريان البطاقة
+              <p className={`text-[9px] leading-tight ${isRevoked ? 'text-rose-300 font-bold' : 'text-slate-300'}`}>
+                {isRevoked ? 'تم إيقاف صلاحية الدخول بموجب قرار الاتحاد' : 'امسح الرمز للتحقق الفوري من صحة سريان البطاقة'}
               </p>
-              <span className="text-[8.5px] font-bold text-emerald-400 block mt-0.5">
+              <span className={`text-[8.5px] font-bold block mt-0.5 ${
+                isRevoked ? 'text-rose-400' : 'text-emerald-400'
+              }`}>
                 الاتحاد الليبي لكرة القدم • طرابلس - ليبيا
               </span>
             </div>
 
             {/* High Contrast QR Code with Clear Padding */}
-            <div className="w-14 h-14 bg-white p-1 rounded-xl shadow-lg border border-amber-400 flex items-center justify-center shrink-0">
+            <div className={`w-14 h-14 bg-white p-1 rounded-xl shadow-lg border flex items-center justify-center shrink-0 ${
+              isRevoked ? 'border-rose-500 ring-2 ring-rose-500/40' : 'border-amber-400'
+            }`}>
               {qrSrc ? (
                 <img src={qrSrc} alt="رمز التحقق" className="w-full h-full object-contain" />
               ) : (
@@ -279,24 +364,41 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
         /* CARD BACK SIDE (OFFICIAL REGULATIONS & MEDICAL DATA) */
         /* ======================================================== */
         <div 
-          className="w-[380px] h-[710px] rounded-[32px] overflow-hidden relative flex flex-col justify-between text-white shadow-2xl transition-all border-[3px] border-slate-700 p-5 text-right text-xs"
+          className={`w-[380px] h-[710px] rounded-[32px] overflow-hidden relative flex flex-col justify-between text-white shadow-2xl transition-all border-[3px] p-5 text-right text-xs ${
+            isRevoked ? 'border-rose-600' : 'border-slate-700'
+          }`}
           style={{
-            background: 'linear-gradient(180deg, #020f07 0%, #051f11 50%, #020f07 100%)'
+            background: isRevoked
+              ? 'linear-gradient(180deg, #1f0303 0%, #3d0606 50%, #1f0303 100%)'
+              : 'linear-gradient(180deg, #020f07 0%, #051f11 50%, #020f07 100%)'
           }}
         >
           {/* Lanyard Slot */}
           <div className="pt-0 pb-1 flex justify-center shrink-0">
-            <div className="w-16 h-2.5 bg-slate-950 rounded-full border-2 border-slate-700 shadow-inner"></div>
+            <div className={`w-16 h-2.5 bg-slate-950 rounded-full border-2 ${
+              isRevoked ? 'border-rose-600' : 'border-slate-700'
+            } shadow-inner`}></div>
           </div>
 
           {/* Header Back */}
           <div className="text-center border-b border-white/10 pb-2 shrink-0">
-            <h4 className="text-sm font-black text-amber-300">الاتحاد الليبي لكرة القدم</h4>
+            <h4 className={`text-sm font-black ${isRevoked ? 'text-rose-300' : 'text-amber-300'}`}>
+              الاتحاد الليبي لكرة القدم
+            </h4>
             <p className="text-[10px] text-slate-400">الضوابط والتعليمات الرسمية لحاملي بطاقات الاعتماد</p>
           </div>
 
+          {/* Warning Badge if Revoked */}
+          {isRevoked && (
+            <div className="p-2.5 rounded-xl bg-rose-600 text-white text-center font-bold text-[11px] shadow-lg border border-rose-300 shrink-0 my-1">
+              ⛔ إشعار سحب: تم سحب هذه البطاقة رسمياً ويحظر استخدامها في كافة الملاعب
+            </div>
+          )}
+
           {/* Security Hologram Strip */}
-          <div className="hologram-effect h-7 rounded-lg border border-amber-400/50 flex items-center justify-center my-1 shrink-0">
+          <div className={`hologram-effect h-7 rounded-lg border flex items-center justify-center my-1 shrink-0 ${
+            isRevoked ? 'border-rose-500/50' : 'border-amber-400/50'
+          }`}>
             <span className="text-[10px] font-black text-slate-950 tracking-wider">
               ★ الاتحاد الليبي لكرة القدم • شريط الأمان والتوثيق الرسمي ★
             </span>

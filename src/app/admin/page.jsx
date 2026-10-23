@@ -28,7 +28,9 @@ import {
   Shield,
   Edit3,
   UserPlus,
-  Lock
+  Lock,
+  Ban,
+  AlertTriangle
 } from 'lucide-react';
 import LFFLogo from '@/components/LFFLogo';
 
@@ -405,6 +407,7 @@ export default function AdminPage() {
   const approvedCount = journalists.filter(j => j.status === 'APPROVED').length;
   const pendingCount = journalists.filter(j => j.status === 'PENDING').length;
   const rejectedCount = journalists.filter(j => j.status === 'REJECTED').length;
+  const revokedCount = journalists.filter(j => j.status === 'REVOKED').length;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -503,7 +506,7 @@ export default function AdminPage() {
           </div>
 
           {/* KPI Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
             <div 
               onClick={() => setFilterStatus('ALL')}
               className={`p-5 rounded-2xl border cursor-pointer transition-all ${
@@ -555,6 +558,19 @@ export default function AdminPage() {
               </div>
               <span className="text-3xl font-black text-rose-400">{rejectedCount}</span>
             </div>
+
+            <div 
+              onClick={() => setFilterStatus('REVOKED')}
+              className={`p-5 rounded-2xl border cursor-pointer transition-all ${
+                filterStatus === 'REVOKED' ? 'bg-orange-950/40 border-orange-500/60 ring-2 ring-orange-500/20' : 'bg-slate-900/60 border-slate-800 hover:bg-slate-800/50'
+              }`}
+            >
+              <div className="flex items-center justify-between text-orange-400 text-xs mb-2">
+                <span>البطاقات المسحوبة</span>
+                <Ban className="w-4 h-4 text-orange-400" />
+              </div>
+              <span className="text-3xl font-black text-orange-400">{revokedCount}</span>
+            </div>
           </div>
 
           {/* Search and Filters Bar */}
@@ -576,6 +592,7 @@ export default function AdminPage() {
                 { id: 'PENDING', label: 'قيد الانتظار' },
                 { id: 'APPROVED', label: 'معتمد' },
                 { id: 'REJECTED', label: 'مرفوض' },
+                { id: 'REVOKED', label: 'مسحوبة' },
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -651,13 +668,16 @@ export default function AdminPage() {
                               ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' 
                               : j.status === 'PENDING'
                               ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                              : j.status === 'REVOKED'
+                              ? 'bg-orange-500/20 text-orange-300 border-orange-500/40'
                               : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
                           }`}>
                             {j.status === 'APPROVED' && <CheckCircle2 className="w-3 h-3 text-emerald-400" />}
                             {j.status === 'PENDING' && <Clock className="w-3 h-3 text-amber-400" />}
                             {j.status === 'REJECTED' && <XCircle className="w-3 h-3 text-rose-400" />}
+                            {j.status === 'REVOKED' && <Ban className="w-3 h-3 text-orange-400" />}
                             <span>
-                              {j.status === 'APPROVED' ? 'معتمد' : j.status === 'PENDING' ? 'قيد الانتظار' : 'مرفوض'}
+                              {j.status === 'APPROVED' ? 'معتمد' : j.status === 'PENDING' ? 'قيد الانتظار' : j.status === 'REVOKED' ? 'مسحوبة' : 'مرفوض'}
                             </span>
                           </span>
                         </td>
@@ -1096,6 +1116,42 @@ export default function AdminPage() {
                   <span>رفض الطلب</span>
                 </button>
               </div>
+
+              {/* Revoke / Unrevoke — only show for APPROVED or REVOKED */}
+              {(activeModal.status === 'APPROVED' || activeModal.status === 'REVOKED') && (
+                <div className={`mt-1 p-3 rounded-xl border ${
+                  activeModal.status === 'REVOKED'
+                    ? 'bg-orange-950/30 border-orange-500/30'
+                    : 'bg-slate-950 border-slate-800'
+                }`}>
+                  <p className="text-[11px] text-slate-400 mb-2 font-semibold">
+                    {activeModal.status === 'REVOKED' ? '⛔ البطاقة حالياً مسحوبة — يمكن إلغاء السحب:' : '⚠️ إجراء سحب بطاقة الاعتماد:'}
+                  </p>
+                  {activeModal.status === 'REVOKED' ? (
+                    <button
+                      disabled={processingId !== null}
+                      onClick={() => handleUpdateStatus(activeModal.id, 'APPROVED')}
+                      className="w-full py-2.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-600 border border-emerald-500/50 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all"
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>إلغاء السحب واستعادة صلاحية البطاقة</span>
+                    </button>
+                  ) : (
+                    <button
+                      disabled={processingId !== null}
+                      onClick={() => {
+                        if (confirm(`هل أنت متأكد من سحب بطاقة اعتماد (${activeModal.fullName})؟ ستوقف صلاحيتها فوراً.`)) {
+                          handleUpdateStatus(activeModal.id, 'REVOKED');
+                        }
+                      }}
+                      className="w-full py-2.5 px-4 rounded-xl bg-orange-700/40 hover:bg-orange-700 border border-orange-500/40 text-orange-300 hover:text-white font-bold text-xs flex items-center justify-center gap-2 transition-all"
+                    >
+                      <Ban className="w-4 h-4" />
+                      <span>سحب بطاقة الاعتماد وإيقاف الصلاحية</span>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
