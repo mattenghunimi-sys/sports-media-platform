@@ -34,10 +34,12 @@ const DEFAULT_SERVICE_KEY =
 
 let _adminClient = null;
 
+class DummyWebSocket {}
+
 export function getAdminClient() {
   if (!_adminClient) {
     if (typeof globalThis.WebSocket === 'undefined') {
-      globalThis.WebSocket = class DummyWebSocket {};
+      globalThis.WebSocket = DummyWebSocket;
     }
 
     const url = getValidSupabaseUrl();
@@ -48,8 +50,8 @@ export function getAdminClient() {
         persistSession: false,
         autoRefreshToken: false,
       },
-      // Disable realtime subscriptions to reduce overhead
       realtime: {
+        transport: DummyWebSocket,
         params: { eventsPerSecond: -1 },
       },
     });

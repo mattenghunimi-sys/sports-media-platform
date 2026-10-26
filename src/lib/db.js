@@ -32,14 +32,26 @@ function mapToCamel(row) {
 
 // ========== GET ALL ==========
 export async function getAllJournalists() {
-  const { data, error } = await supabaseAdmin
+  let { data, error } = await supabaseAdmin
     .from('journalists')
     .select('*')
     .order('created_at', { ascending: false });
 
+  // Retry once if transient timeout/connection error (e.g. Supabase waking up)
+  if (error) {
+    console.warn('Initial fetch failed, retrying once...', error.message);
+    await new Promise(resolve => setTimeout(resolve, 800));
+    const retry = await supabaseAdmin
+      .from('journalists')
+      .select('*')
+      .order('created_at', { ascending: false });
+    data = retry.data;
+    error = retry.error;
+  }
+
   if (error) {
     console.error('Error fetching journalists:', error);
-    return [];
+    throw new Error(`تعذر استرجاع الطلبات من قاعدة البيانات: ${error.message}`);
   }
   return (data || []).map(mapToCamel);
 }
