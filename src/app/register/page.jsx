@@ -46,10 +46,69 @@ export default function RegisterPage() {
 
   const [photoPreview, setPhotoPreview] = useState('');
   const [docName, setDocName] = useState('');
+  const [photoCompressing, setPhotoCompressing] = useState(false);
+  const [docCompressing, setDocCompressing] = useState(false);
+  const [photoSizeInfo, setPhotoSizeInfo] = useState('');
+  const [docSizeInfo, setDocSizeInfo] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successData, setSuccessData] = useState(null);
+
+  // Helper function to automatically compress and resize images client-side
+  const compressImage = (file, { maxWidth = 800, maxHeight = 800, quality = 0.82 } = {}) => {
+    return new Promise((resolve, reject) => {
+      if (!file || !file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (readerEvent) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(readerEvent.target.result);
+            return;
+          }
+
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressedDataUrl);
+        };
+        img.onerror = () => resolve(readerEvent.target.result);
+        img.src = readerEvent.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
 
   // Handle Text inputs
   const handleChange = (e) => {
@@ -57,35 +116,47 @@ export default function RegisterPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Handle Photo upload and convert to base64
-  const handlePhotoUpload = (e) => {
+  // Handle Photo upload with automatic compression
+  const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert('حجم الصورة كبير، يرجى اختيار صورة أقل من 5 ميغابايت');
-      return;
-    }
+    setPhotoCompressing(true);
+    setPhotoSizeInfo('');
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPhotoPreview(reader.result);
-      setFormData(prev => ({ ...prev, photoUrl: reader.result }));
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await compressImage(file, { maxWidth: 800, maxHeight: 800, quality: 0.82 });
+      const sizeKB = Math.round((compressed.length * 0.75) / 1024);
+      setPhotoPreview(compressed);
+      setFormData(prev => ({ ...prev, photoUrl: compressed }));
+      setPhotoSizeInfo(`✓ تم تصغير وضغط الصورة بنجاح (${sizeKB} ك.ب)`);
+    } catch (err) {
+      console.error('Photo compression error:', err);
+      alert('تعذر معالجة الصورة، يرجى اختيار صورة أخرى');
+    } finally {
+      setPhotoCompressing(false);
+    }
   };
 
-  // Handle Document upload
-  const handleDocUpload = (e) => {
+  // Handle Document upload with automatic compression
+  const handleDocUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setDocName(file.name);
+    setDocCompressing(true);
+    setDocSizeInfo('');
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setFormData(prev => ({ ...prev, documentUrl: reader.result }));
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await compressImage(file, { maxWidth: 1400, maxHeight: 1400, quality: 0.80 });
+      const sizeKB = Math.round((compressed.length * 0.75) / 1024);
+      setFormData(prev => ({ ...prev, documentUrl: compressed }));
+      setDocSizeInfo(`✓ تم تحسين حجم الوثيقة بنجاح (${sizeKB} ك.ب)`);
+    } catch (err) {
+      console.error('Document compression error:', err);
+      alert('تعذر معالجة ملف الوثيقة');
+    } finally {
+      setDocCompressing(false);
+    }
   };
 
   // Quick preset avatars for convenience
@@ -405,17 +476,24 @@ export default function RegisterPage() {
                     )}
                   </div>
                   <div className="flex-1 text-center sm:text-right">
-                    <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors">
+                    <label className={`cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white text-xs font-bold transition-colors ${
+                      photoCompressing ? 'bg-amber-600 animate-pulse' : 'bg-emerald-600 hover:bg-emerald-500'
+                    }`}>
                       <Upload className="w-4 h-4" />
-                      <span>اختر صورة من جهازك</span>
+                      <span>{photoCompressing ? 'جاري ضغط وتصغير الصورة...' : (formData.photoUrl ? 'تغيير الصورة الشخصية' : 'اختر صورة من جهازك')}</span>
                       <input 
                         type="file" 
                         accept="image/*" 
+                        disabled={photoCompressing}
                         onChange={handlePhotoUpload} 
                         className="hidden" 
                       />
                     </label>
-                    <p className="text-[11px] text-slate-400 mt-1">يدعم JPG و PNG حتى 5MB</p>
+                    {photoSizeInfo ? (
+                      <p className="text-[11px] text-emerald-400 font-semibold mt-1">{photoSizeInfo}</p>
+                    ) : (
+                      <p className="text-[11px] text-slate-400 mt-1">يتم تصغير وضغط الصورة تلقائياً بجودة عالية لتناسب البطاقة</p>
+                    )}
 
                     {/* Quick test avatars */}
                     <div className="flex items-center gap-2 mt-2">
@@ -476,20 +554,27 @@ export default function RegisterPage() {
                       <span className="text-xs text-slate-200 block font-bold">
                         {docName || (formData.documentUrl ? 'تم رفع وثيقة التكليف بنجاح' : 'إرفاق المستند (صورة أو PDF)')}
                       </span>
-                      <span className="text-[10px] text-slate-400">
-                        صورة من خطاب التكليف الرسمي الصادر من القناة أو الصحيفة أو بطاقة عضوية المؤسسة
-                      </span>
+                      {docSizeInfo ? (
+                        <span className="text-[10px] text-emerald-400 font-semibold block">{docSizeInfo}</span>
+                      ) : (
+                        <span className="text-[10px] text-slate-400">
+                          صورة من خطاب التكليف الرسمي الصادر من القناة أو الصحيفة أو بطاقة عضوية المؤسسة
+                        </span>
+                      )}
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <label className="cursor-pointer px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-md flex items-center gap-1.5">
+                    <label className={`cursor-pointer px-4 py-2 rounded-xl text-white text-xs font-bold transition-all shadow-md flex items-center gap-1.5 ${
+                      docCompressing ? 'bg-amber-600 animate-pulse' : 'bg-emerald-600 hover:bg-emerald-500'
+                    }`}>
                       <Upload className="w-3.5 h-3.5" />
-                      <span>{formData.documentUrl ? 'تغيير الوثيقة' : 'رفع الوثيقة الآن *'}</span>
+                      <span>{docCompressing ? 'جاري تحسين الوثيقة...' : (formData.documentUrl ? 'تغيير الوثيقة' : 'رفع الوثيقة الآن *')}</span>
                       <input 
                         type="file" 
                         required
                         accept="image/*,.pdf" 
+                        disabled={docCompressing}
                         onChange={handleDocUpload} 
                         className="hidden" 
                       />
