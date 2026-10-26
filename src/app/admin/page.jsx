@@ -57,9 +57,33 @@ export default function AdminPage() {
   
   // Selected journalist for details modal
   const [activeModal, setActiveModal] = useState(null);
+  const [modalLoading, setModalLoading] = useState(false);
   const [reviewNotes, setReviewNotes] = useState('');
   const [selectedZones, setSelectedZones] = useState('MEDIA CENTRE - PRESS BOX');
   const [processingId, setProcessingId] = useState(null);
+
+  const handleOpenReviewModal = async (j) => {
+    setActiveModal(j);
+    setReviewNotes(j.reviewNotes || '');
+    setSelectedZones(j.zoneAccess || 'MEDIA CENTRE - PRESS BOX');
+
+    if (!j.documentUrl || !j.photoUrl) {
+      setModalLoading(true);
+      try {
+        const res = await fetch(`/api/journalists/${j.id}`);
+        const data = await res.json();
+        if (data.success && data.data) {
+          setActiveModal(data.data);
+          if (data.data.reviewNotes) setReviewNotes(data.data.reviewNotes);
+          if (data.data.zoneAccess) setSelectedZones(data.data.zoneAccess);
+        }
+      } catch (err) {
+        console.error('Error fetching journalist full details:', err);
+      } finally {
+        setModalLoading(false);
+      }
+    }
+  };
 
   // Users Management State
   const [usersList, setUsersList] = useState([]);
@@ -636,11 +660,9 @@ export default function AdminPage() {
                       <tr key={j.id} className="hover:bg-slate-800/40 transition-colors">
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-3">
-                            <img
-                              src={j.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
-                              alt={j.fullName}
-                              className="w-10 h-10 rounded-xl object-cover border border-slate-700"
-                            />
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 flex items-center justify-center font-black text-emerald-400 text-sm shrink-0 shadow-inner">
+                              {j.fullName ? j.fullName.trim().charAt(0) : 'ص'}
+                            </div>
                             <div>
                               <span className="font-bold text-white block text-sm">{j.fullName}</span>
                               <span className="text-[11px] text-slate-400 font-mono">هوية: {j.nationalId}</span>
@@ -691,11 +713,7 @@ export default function AdminPage() {
                         <td className="py-3 px-4">
                           <div className="flex items-center justify-center gap-1.5">
                             <button
-                              onClick={() => {
-                                setActiveModal(j);
-                                setReviewNotes(j.reviewNotes || '');
-                                setSelectedZones(j.zoneAccess || 'MEDIA CENTRE - PRESS BOX');
-                              }}
+                              onClick={() => handleOpenReviewModal(j)}
                               className="p-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white transition-colors"
                               title="مراجعة واعتماد"
                             >
@@ -1033,7 +1051,9 @@ export default function AdminPage() {
               <div>
                 <label className="block text-slate-300 font-bold mb-1.5 flex items-center justify-between">
                   <span>خطاب تكليف المؤسسة أو بطاقة العمل الإعلامي المرفوعة:</span>
-                  {activeModal.documentUrl ? (
+                  {modalLoading ? (
+                    <span className="text-[10px] text-amber-400 font-semibold animate-pulse">⏳ جاري تحميل الوثيقة...</span>
+                  ) : activeModal.documentUrl ? (
                     <span className="text-[10px] text-emerald-400 font-semibold">✓ تم إرفاق الوثيقة</span>
                   ) : (
                     <span className="text-[10px] text-amber-400 font-semibold">بانتظار تدقيق الوثيقة</span>

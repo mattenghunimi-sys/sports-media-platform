@@ -31,19 +31,46 @@ function mapToCamel(row) {
 }
 
 // ========== GET ALL ==========
+// Optimized: omits massive raw base64 document/photo payloads from the bulk list
+// to prevent PostgreSQL statement timeout and ensure instant loading of all requests.
 export async function getAllJournalists() {
+  const fields = [
+    'id',
+    'accreditation_code',
+    'full_name',
+    'national_id',
+    'media_outlet',
+    'outlet_type',
+    'role',
+    'coverage_type',
+    'phone',
+    'email',
+    'city',
+    'country',
+    'experience_years',
+    'syndicate_number',
+    'status',
+    'issue_date',
+    'expiry_date',
+    'blood_type',
+    'zone_access',
+    'review_notes',
+    'created_at',
+    'approved_at'
+  ].join(', ');
+
   let { data, error } = await supabaseAdmin
     .from('journalists')
-    .select('*')
+    .select(fields)
     .order('created_at', { ascending: false });
 
-  // Retry once if transient timeout/connection error (e.g. Supabase waking up)
+  // Retry once if transient timeout (e.g. cold start)
   if (error) {
     console.warn('Initial fetch failed, retrying once...', error.message);
     await new Promise(resolve => setTimeout(resolve, 800));
     const retry = await supabaseAdmin
       .from('journalists')
-      .select('*')
+      .select(fields)
       .order('created_at', { ascending: false });
     data = retry.data;
     error = retry.error;
