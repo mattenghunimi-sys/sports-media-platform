@@ -1,6 +1,14 @@
 import './globals.css';
+import { Cairo } from 'next/font/google';
 import Navbar from '@/components/Navbar';
 import LFFLogo from '@/components/LFFLogo';
+
+const cairo = Cairo({
+  subsets: ['arabic', 'latin'],
+  weight: ['400', '600', '700', '800', '900'],
+  display: 'swap',
+  variable: '--font-cairo',
+});
 
 export const metadata = {
   title: 'الاتحاد الليبي لكرة القدم | منظومة اعتماد وبطاقات الإعلاميين الرياضيين',
@@ -9,8 +17,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="ar" dir="rtl">
-      <body className="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-emerald-600 selection:text-white">
+    <html lang="ar" dir="rtl" className={cairo.variable}>
+      <body className={`${cairo.className} bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-emerald-600 selection:text-white`}>
         {/* Navigation Bar (Hidden automatically on home page '/') */}
         <Navbar />
 
