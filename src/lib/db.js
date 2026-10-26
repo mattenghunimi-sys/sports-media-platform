@@ -105,22 +105,18 @@ export async function updateJournalistStatus(id, { status, reviewNotes, zoneAcce
   const today = new Date().toISOString().split('T')[0];
   const nextYear = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-  const { data: current, error: fetchError } = await supabaseAdmin
-    .from('journalists')
-    .select('*')
-    .eq('id', id)
-    .maybeSingle();
-
-  if (fetchError || !current) return null;
-
+  // Build update payload directly — avoid extra SELECT round-trip
   const updates = {
-    status: status || current.status,
-    review_notes: reviewNotes !== undefined ? reviewNotes : current.review_notes,
-    zone_access: zoneAccess || current.zone_access || 'MEDIA CENTRE - PRESS BOX',
-    blood_type: bloodType || current.blood_type,
-    issue_date: status === 'APPROVED' ? (current.issue_date || today) : current.issue_date,
-    expiry_date: status === 'APPROVED' ? (current.expiry_date || nextYear) : current.expiry_date,
-    approved_at: status === 'APPROVED' ? (current.approved_at || new Date().toISOString()) : current.approved_at,
+    status,
+    ...(reviewNotes !== undefined && { review_notes: reviewNotes }),
+    ...(zoneAccess && { zone_access: zoneAccess }),
+    ...(bloodType && { blood_type: bloodType }),
+    // Only set dates when approving for the first time
+    ...(status === 'APPROVED' && {
+      issue_date: today,
+      expiry_date: nextYear,
+      approved_at: new Date().toISOString(),
+    }),
   };
 
   const { data, error } = await supabaseAdmin

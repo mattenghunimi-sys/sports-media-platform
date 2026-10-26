@@ -48,6 +48,10 @@ export function getAdminClient() {
         persistSession: false,
         autoRefreshToken: false,
       },
+      // Disable realtime subscriptions to reduce overhead
+      realtime: {
+        params: { eventsPerSecond: -1 },
+      },
     });
   }
   return _adminClient;
