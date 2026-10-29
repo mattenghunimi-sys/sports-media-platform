@@ -10,7 +10,7 @@ function mapToCamel(row) {
     mediaOutlet: row.media_outlet,
     outletType: row.outlet_type,
     role: row.role,
-    coverageType: row.coverage_type,
+    coverageType: 'جميع المسابقات الرسمية',
     phone: row.phone,
     email: row.email,
     city: row.city,

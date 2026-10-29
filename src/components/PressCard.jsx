@@ -266,7 +266,7 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
               <div className="flex items-center justify-between text-xs">
                 <span className="text-black font-bold text-[10px]">المسابقات المعتمدة:</span>
                 <span className="text-black text-[10px] font-black">
-                  {coverageType || 'جميع المسابقات الرسمية'}
+                  جميع المسابقات الرسمية
                 </span>
               </div>
 
