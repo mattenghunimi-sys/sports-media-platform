@@ -59,13 +59,37 @@ export default function AdminPage() {
   const [activeModal, setActiveModal] = useState(null);
   const [modalLoading, setModalLoading] = useState(false);
   const [reviewNotes, setReviewNotes] = useState('');
-  const [selectedZones, setSelectedZones] = useState('MEDIA CENTRE - PRESS BOX');
+  const [selectedZones, setSelectedZones] = useState('المنصة • المركز الإعلامي');
   const [processingId, setProcessingId] = useState(null);
+
+  const AVAILABLE_ZONES = ['المنصة', 'المركز الإعلامي', 'أرضية الملعب'];
+
+  const isZoneActive = (zone) => {
+    if (!selectedZones) return false;
+    if (zone === 'المنصة') return selectedZones.includes('المنصة') || selectedZones.includes('المقصورة') || selectedZones.includes('PRESS') || selectedZones.includes('VIP');
+    if (zone === 'المركز الإعلامي') return selectedZones.includes('المركز') || selectedZones.includes('CENTRE');
+    if (zone === 'أرضية الملعب') return selectedZones.includes('الملعب') || selectedZones.includes('PITCH');
+    return selectedZones.includes(zone);
+  };
+
+  const handleToggleZone = (zone) => {
+    const active = AVAILABLE_ZONES.filter(z => isZoneActive(z));
+    let next;
+    if (active.includes(zone)) {
+      next = active.filter(z => z !== zone);
+    } else {
+      next = [...active, zone];
+    }
+    if (next.length === 0) {
+      next = [zone];
+    }
+    setSelectedZones(next.join(' • '));
+  };
 
   const handleOpenReviewModal = async (j) => {
     setActiveModal(j);
     setReviewNotes(j.reviewNotes || '');
-    setSelectedZones(j.zoneAccess || 'MEDIA CENTRE - PRESS BOX');
+    setSelectedZones(j.zoneAccess || 'المنصة • المركز الإعلامي');
 
     if (!j.documentUrl || !j.photoUrl) {
       setModalLoading(true);
@@ -1045,6 +1069,10 @@ export default function AdminPage() {
                   <span className="text-slate-400 block">فصيلة الدم:</span>
                   <span className="text-rose-400 font-mono font-bold">{activeModal.bloodType}</span>
                 </div>
+                <div className="col-span-2 pt-2 border-t border-slate-800/80 flex justify-between items-center">
+                  <span className="text-slate-400">المسابقات المعتمدة:</span>
+                  <span className="text-emerald-400 font-bold">{activeModal.coverageType || 'جميع المسابقات الرسمية'}</span>
+                </div>
               </div>
 
               {/* Uploaded Assignment Document Preview */}
@@ -1089,19 +1117,41 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <label className="block text-slate-300 font-bold mb-1.5">
-                  المناطق المصرح بدخولها في الملاعب الليبية (Zone Access):
-                </label>
-                <select
-                  value={selectedZones}
-                  onChange={(e) => setSelectedZones(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-white outline-none"
-                >
-                  <option value="MEDIA CENTRE">المركز الإعلامي فقط (Media Centre)</option>
-                  <option value="MEDIA CENTRE - PRESS BOX">المقصورة الصحفية والمركز الإعلامي</option>
-                  <option value="PITCH SIDE - MEDIA CENTRE">أرضية الملعب والمركز الإعلامي (للمصورين)</option>
-                  <option value="VIP - PRESS BOX - PITCH SIDE">شامل جميع المناطق (VIP + Pitch + Press)</option>
-                </select>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-slate-200 font-bold text-xs">
+                    تحديد أماكن تواجد وتصريح الإعلامي في الملاعب:
+                  </label>
+                  <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/40">
+                    {AVAILABLE_ZONES.filter(z => isZoneActive(z)).join(' • ') || 'المركز الإعلامي'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {AVAILABLE_ZONES.map((zone) => {
+                    const active = isZoneActive(zone);
+                    return (
+                      <button
+                        key={zone}
+                        type="button"
+                        onClick={() => handleToggleZone(zone)}
+                        className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center justify-center gap-1.5 ${
+                          active
+                            ? 'bg-emerald-950/70 border-emerald-500 text-white shadow-sm'
+                            : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                        }`}
+                      >
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
+                          active ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-500 border border-slate-700'
+                        }`}>
+                          {active ? '✓' : '+'}
+                        </div>
+                        <span className="font-bold text-xs">{zone}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-[10px] text-slate-500 mt-1.5">
+                  انقر على الأماكن المسموح بتواجد الإعلامي فيها لتفعيلها أو إلغائها فورياً.
+                </p>
               </div>
 
               <div>

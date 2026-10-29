@@ -108,7 +108,7 @@ export async function createJournalist(formData) {
     media_outlet: formData.mediaOutlet || '',
     outlet_type: formData.outletType || 'مؤسسة إعلامية',
     role: formData.role || 'إعلامي رياضي',
-    coverage_type: formData.coverageType || 'شامل',
+    coverage_type: formData.coverageType || 'جميع المسابقات الرسمية',
     phone: formData.phone || '',
     email: formData.email || '',
     city: formData.city || '',
@@ -121,7 +121,7 @@ export async function createJournalist(formData) {
     issue_date: '',
     expiry_date: '',
     blood_type: formData.bloodType || 'غير محدد',
-    zone_access: 'MEDIA CENTRE - PRESS BOX',
+    zone_access: formData.zoneAccess || 'المنصة • المركز الإعلامي',
     review_notes: '',
     approved_at: null,
   };

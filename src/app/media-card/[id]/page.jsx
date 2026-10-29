@@ -279,8 +279,8 @@ export default function JournalistProfilePage() {
               </div>
 
               <div className="p-3 rounded-xl bg-slate-950 border border-slate-800/80">
-                <span className="text-slate-400 block mb-1">المناطق المسموح بدخولها (Zones):</span>
-                <span className="text-sm font-bold font-mono text-amber-400">{journalist.zoneAccess || 'MEDIA CENTRE'}</span>
+                <span className="text-slate-400 block mb-1">المناطق المسموح بالتواجد فيها (Zones):</span>
+                <span className="text-sm font-bold text-amber-400">{journalist.zoneAccess || 'المنصة • المركز الإعلامي'}</span>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-950 border border-slate-800/80">
@@ -295,7 +295,7 @@ export default function JournalistProfilePage() {
 
               <div className="p-3 rounded-xl bg-slate-950 border border-slate-800/80">
                 <span className="text-slate-400 block mb-1">المسابقات المصرحة:</span>
-                <span className="text-slate-200 font-medium">{journalist.coverageType || 'شامل'}</span>
+                <span className="text-slate-200 font-medium">{journalist.coverageType || 'جميع المسابقات الرسمية'}</span>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-950 border border-slate-800/80">

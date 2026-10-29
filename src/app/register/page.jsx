@@ -19,7 +19,6 @@ import {
   Briefcase,
   ShieldCheck
 } from 'lucide-react';
-import PressCard from '@/components/PressCard';
 import LFFLogo from '@/components/LFFLogo';
 
 export default function RegisterPage() {
@@ -32,7 +31,7 @@ export default function RegisterPage() {
     mediaOutlet: '',
     outletType: 'قناة تلفزيونية فضائية',
     role: 'مراسل ميداني',
-    coverageType: 'الدوري الليبي الممتاز وكأس ليبيا',
+    coverageType: 'جميع المسابقات الرسمية',
     phone: '',
     email: '',
     city: 'طرابلس',
@@ -235,10 +234,9 @@ export default function RegisterPage() {
         </Link>
       </div>
 
-      {/* Main Grid: Form on the right, Live Preview on the left */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Form Column (7 cols) */}
-        <div className="lg:col-span-7 bg-slate-900/90 border border-slate-800/90 rounded-3xl p-6 sm:p-8 shadow-xl">
+      {/* Registration Form (Centered without Card Preview as requested) */}
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-6 sm:p-8 shadow-xl">
           {errorMessage && (
             <div className="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
@@ -427,12 +425,12 @@ export default function RegisterPage() {
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    نوع التغطية الرياضية
+                    المسابقات المصرح بتغطيتها
                   </label>
                   <input
                     type="text"
                     name="coverageType"
-                    placeholder="مثال: دوري روشن، دوري كرة السلة، شامل..."
+                    placeholder="جميع المسابقات الرسمية"
                     value={formData.coverageType}
                     onChange={handleChange}
                     className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-sm text-white outline-none"
@@ -708,33 +706,6 @@ export default function RegisterPage() {
               </button>
             </div>
           </form>
-        </div>
-
-        {/* Live Card Preview Column (5 cols) */}
-        <div className="lg:col-span-5 sticky top-28 space-y-4">
-          <div className="text-center sm:text-right">
-            <h3 className="text-sm font-bold text-slate-300 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-amber-400" />
-              <span>معاينة حية لشكل بطاقة الاعتماد الصحفي</span>
-            </h3>
-            <p className="text-xs text-slate-500">يتم تحديث شكل البطاقة لحظياً أثناء إدخالك للبيانات</p>
-          </div>
-
-          <div className="flex justify-center p-4 rounded-3xl bg-slate-900/40 border border-slate-800/80">
-            <PressCard 
-              journalist={{
-                fullName: formData.fullName || 'الاسم الكامل للإعلامي',
-                mediaOutlet: formData.mediaOutlet || 'المؤسسة الإعلامية',
-                role: formData.role,
-                coverageType: formData.coverageType,
-                accreditationCode: 'SMA-2026-PREVIEW',
-                photoUrl: photoPreview || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-                status: 'PENDING',
-                bloodType: formData.bloodType
-              }}
-              scale={0.92}
-            />
-          </div>
         </div>
       </div>
     </div>
