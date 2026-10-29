@@ -348,7 +348,7 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
         /* CARD BACK SIDE (EXACT 9cm x 13cm - WHITE BACKGROUND) */
         /* ======================================================== */
         <div 
-          className={`rounded-[20px] overflow-hidden relative flex flex-col justify-between bg-white text-black shadow-xl transition-all border-2 p-3 text-right text-xs ${
+          className={`rounded-[20px] overflow-hidden relative flex flex-col justify-between bg-white text-black shadow-xl transition-all border-2 p-3.5 text-right text-xs ${
             isRevoked ? 'border-rose-600' : 'border-emerald-700'
           }`}
           style={{
@@ -356,19 +356,24 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
             height: '13cm'
           }}
         >
-          {/* Lanyard Slot */}
-          <div className="pt-0.5 pb-0.5 flex justify-center shrink-0">
+          {/* Top Lanyard Slot with Safe Distance */}
+          <div className="pt-1 pb-1 flex justify-center shrink-0">
             <div className={`w-12 h-1.5 bg-slate-200 rounded-full border ${
               isRevoked ? 'border-rose-300' : 'border-slate-400'
             }`}></div>
           </div>
 
-          {/* Header Back */}
-          <div className="text-center border-b border-slate-300 pb-0.5 shrink-0">
-            <h4 className="text-[14px] font-black text-black">
+          {/* Header Back - Lowered and distanced from lanyard slot */}
+          <div className="text-center border-b border-slate-300 pt-2 pb-1.5 shrink-0 mt-1">
+            <div className="flex justify-center mb-1">
+              <LFFLogo size={26} />
+            </div>
+            <h4 className="text-[14.5px] font-black text-black tracking-tight leading-tight">
               الاتحاد الليبي لكرة القدم
             </h4>
-            <p className="text-[9px] font-bold text-black">الضوابط والتعليمات الرسمية لحاملي بطاقات الاعتماد</p>
+            <p className="text-[9.5px] font-bold text-black mt-0.5">
+              الضوابط والتعليمات الرسمية لحاملي بطاقات الاعتماد
+            </p>
           </div>
 
           {/* Warning Badge if Revoked */}
@@ -386,12 +391,13 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
           </div>
 
           {/* Instructions and Terms in 100% Arabic & Solid Crisp Black */}
-          <div className="space-y-1 text-[8.5px] leading-tight text-black bg-slate-50 p-2 rounded-lg border border-slate-300 flex-1 my-0.5 justify-center flex flex-col">
-            <h5 className="font-black text-black text-[9.5px] border-b border-slate-300 pb-0.5 mb-0.5">
-              ضوابط وتعليمات استخدام البطاقة:
+          <div className="space-y-1 text-black bg-slate-50 p-2.5 rounded-xl border border-slate-300 flex-1 my-1 justify-center flex flex-col">
+            <h5 className="font-black text-black text-[10px] border-b border-slate-300 pb-1 mb-1 flex items-center justify-between">
+              <span>ضوابط وتعليمات استخدام البطاقة:</span>
+              <span className="text-[8.5px] text-emerald-800 font-bold">الموسم 2026 / 2027</span>
             </h5>
-            <ul className="list-disc list-inside space-y-0.5 text-black font-semibold">
-              <li>هذه البطاقة وثيقة رسمية مخصصة لحاملها فقط ولا يجوز إعارتها أو التنازل عنها.</li>
+            <ul className="list-disc pr-4 space-y-1 text-black font-semibold text-[8.5px] leading-snug">
+              <li>هذه البطاقة وثيقة رسمية مخصصة لحاملها فقط ولا يجوز إعارتها أو التنازل عنها للغير.</li>
               <li>يجب إبراز البطاقة وتعليقها على الصدر طوال فترة التواجد بالملاعب.</li>
               <li>تخول البطاقة حاملها التواجد فقط في الأماكن المحددة (المنصة - المركز الإعلامي - أرضية الملعب للمصورين).</li>
               <li className="font-black text-black">يسمح للمراسلين التواجد بأرضية الملعب بعد صافرة نهاية المباراة.</li>
@@ -415,8 +421,8 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
           {/* Barcode & Official Digital Signature */}
           <div className="border-t border-slate-300 pt-1 flex items-center justify-between shrink-0">
             <div className="text-right">
-              <span className="text-[7.5px] text-black font-bold block">الختم الرقمي والتوقيع:</span>
-              <div className="text-black text-[8.5px] font-black flex items-center gap-1 mt-0.5">
+              <span className="text-[8px] text-black font-bold block">الختم الرقمي والتوقيع:</span>
+              <div className="text-black text-[9px] font-black flex items-center gap-1 mt-0.5">
                 <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
                 <span>معتمد من الأمانة العامة للاتحاد</span>
               </div>
@@ -429,7 +435,7 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
                   <div key={i} className="bg-black h-full" style={{ width: `${w}px` }}></div>
                 ))}
               </div>
-              <span className="text-[7.5px] font-mono text-black font-bold mt-0.5">{accreditationCode}</span>
+              <span className="text-[8px] font-mono text-black font-bold mt-0.5">{accreditationCode}</span>
             </div>
           </div>
         </div>
