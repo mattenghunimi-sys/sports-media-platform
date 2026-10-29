@@ -43,7 +43,7 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
     const verifyUrl = `${origin}/media-card/${id || accreditationCode}`;
     
     QRCode.toDataURL(verifyUrl, {
-      width: 200,
+      width: 180,
       margin: 1,
       color: {
         dark: '#000000',
@@ -60,27 +60,27 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
       return {
         title: 'مصور فوتوغرافي ميداني',
         color: 'from-amber-600 to-amber-700 text-white',
-        icon: <Camera className="w-3 h-3" />
+        icon: <Camera className="w-2.5 h-2.5" />
       };
     }
     if (role.includes('مراسل')) {
       return {
         title: 'مراسل ميداني معتمد',
         color: 'from-emerald-600 to-teal-700 text-white',
-        icon: <Radio className="w-3 h-3" />
+        icon: <Radio className="w-2.5 h-2.5" />
       };
     }
     if (role.includes('معلق') || role.includes('مذيع')) {
       return {
         title: 'معلق ومحلل رياضي',
         color: 'from-blue-600 to-indigo-700 text-white',
-        icon: <Mic className="w-3 h-3" />
+        icon: <Mic className="w-2.5 h-2.5" />
       };
     }
     return {
       title: 'محرر وصحفي رياضي',
       color: 'from-slate-700 to-slate-800 text-white',
-      icon: <FileText className="w-3 h-3" />
+      icon: <FileText className="w-2.5 h-2.5" />
     };
   };
 
@@ -111,59 +111,61 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
       style={{ transform: `scale(${scale})`, transformOrigin: 'top center' }}
     >
       {/* ======================================================== */}
-      {/* CARD FRONT SIDE (WHITE BACKGROUND - ALL TEXT CRISP BLACK) */}
+      {/* CARD FRONT SIDE (EXACT 9cm x 13cm - WHITE BACKGROUND) */}
       {/* ======================================================== */}
       {!showBack ? (
         <div 
-          className={`w-[325px] h-[580px] rounded-[26px] overflow-hidden relative flex flex-col justify-between bg-white text-black shadow-xl transition-all border-2 ${
+          className={`rounded-[20px] overflow-hidden relative flex flex-col justify-between bg-white text-black shadow-xl transition-all border-2 ${
             isRevoked ? 'border-rose-600' : 'border-emerald-700'
           }`}
           style={{
+            width: '9cm',
+            height: '13cm',
             boxShadow: isRevoked
               ? '0 15px 35px -10px rgba(225, 29, 72, 0.35)'
               : '0 15px 35px -10px rgba(5, 150, 105, 0.25)'
           }}
         >
           {/* Top Lanyard Slot */}
-          <div className="pt-2 pb-0.5 flex justify-center relative z-20 shrink-0">
-            <div className={`w-14 h-2 bg-slate-200 rounded-full border ${
+          <div className="pt-1.5 pb-0.5 flex justify-center relative z-20 shrink-0">
+            <div className={`w-12 h-1.5 bg-slate-200 rounded-full border ${
               isRevoked ? 'border-rose-300' : 'border-slate-400'
             }`}></div>
           </div>
 
           {/* ================= HEADER SECTION ================= */}
-          <div className="px-3.5 pt-0.5 pb-1 text-center relative z-10 shrink-0">
+          <div className="px-3 pt-0.5 pb-0.5 text-center relative z-10 shrink-0">
             {/* Centered Official Logo */}
             <div className="flex justify-center mb-0.5">
-              <LFFLogo size={38} />
+              <LFFLogo size={32} />
             </div>
 
             {/* Federation Official Arabic Name */}
-            <h2 className="text-[17px] font-black text-black tracking-tight leading-tight">
+            <h2 className="text-[15px] font-black text-black tracking-tight leading-tight">
               الاتحاد الليبي لكرة القدم
             </h2>
 
             {/* Sub-label in Arabic */}
-            <p className="text-[10px] font-bold text-black tracking-wide mt-0.5">
+            <p className="text-[9px] font-bold text-black tracking-wide mt-0.5">
               الإدارة العامة للإعلام والتوثيق والاتصال
             </p>
 
             {/* Official Pass Ribbon */}
-            <div className={`mt-1.5 py-1 px-3 rounded-lg font-black text-[10.5px] shadow-sm flex items-center justify-between border ${
+            <div className={`mt-1 py-0.5 px-2.5 rounded-md font-black text-[9.5px] shadow-xs flex items-center justify-between border ${
               isRevoked
                 ? 'bg-rose-600 text-white border-rose-700'
                 : 'bg-emerald-700 text-white border-emerald-800'
             }`}>
-              <span className="text-[9.5px]">الموسم 2026 / 2027</span>
-              <span className="flex items-center gap-1 text-[10px]">
+              <span className="text-[8.5px]">الموسم 2026 / 2027</span>
+              <span className="flex items-center gap-1 text-[9px]">
                 {isRevoked ? (
                   <>
-                    <AlertCircle className="w-3 h-3 text-white" />
+                    <AlertCircle className="w-2.5 h-2.5 text-white" />
                     <span>البطاقة مسحوبة</span>
                   </>
                 ) : (
                   <>
-                    <ShieldCheck className="w-3 h-3 text-emerald-200" />
+                    <ShieldCheck className="w-2.5 h-2.5 text-emerald-200" />
                     <span>بطاقة اعتماد إعلامي رسمي</span>
                   </>
                 )}
@@ -172,15 +174,15 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
           </div>
 
           {/* ================= MIDDLE: PHOTO & CREDENTIALS ================= */}
-          <div className="px-3.5 flex flex-col items-center text-center relative z-10 flex-1 justify-center my-0.5">
+          <div className="px-3 flex flex-col items-center text-center relative z-10 flex-1 justify-center my-0.5">
             {/* Photo with Frame */}
-            <div className="relative mb-1.5 shrink-0">
-              <div className={`w-24 h-28 rounded-xl p-0.5 shadow-md ${
+            <div className="relative mb-1 shrink-0">
+              <div className={`w-[74px] h-[88px] rounded-lg p-0.5 shadow-sm ${
                 isRevoked
                   ? 'bg-gradient-to-b from-rose-500 to-rose-700'
                   : 'bg-gradient-to-b from-amber-500 via-emerald-600 to-teal-700'
               }`}>
-                <div className="w-full h-full rounded-[10px] overflow-hidden bg-slate-100 relative border border-slate-300">
+                <div className="w-full h-full rounded-[6px] overflow-hidden bg-slate-100 relative border border-slate-300">
                   {photoUrl ? (
                     <img 
                       src={photoUrl} 
@@ -189,16 +191,16 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
                     />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 bg-slate-100">
-                      <Camera className="w-7 h-7 mb-0.5 text-slate-500" />
-                      <span className="text-[9px] font-bold text-black">الصورة</span>
+                      <Camera className="w-6 h-6 mb-0.5 text-slate-500" />
+                      <span className="text-[8px] font-bold text-black">الصورة</span>
                     </div>
                   )}
 
                   {/* Red Revocation Stamp Across Photo */}
                   {isRevoked && (
                     <div className="absolute inset-0 bg-rose-950/60 backdrop-blur-[1px] flex items-center justify-center z-20">
-                      <div className="transform -rotate-12 bg-rose-600 border border-white px-2 py-0.5 rounded shadow-lg">
-                        <span className="text-white font-black text-[10px] tracking-wider block">
+                      <div className="transform -rotate-12 bg-rose-600 border border-white px-1.5 py-0.5 rounded shadow">
+                        <span className="text-white font-black text-[9px] tracking-wider block">
                           البطاقة مسحوبة
                         </span>
                       </div>
@@ -208,8 +210,8 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
               </div>
 
               {/* Status Badge Pin */}
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap z-20">
-                <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black shadow border flex items-center gap-1 ${
+              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 whitespace-nowrap z-20">
+                <span className={`px-2 py-0.2 rounded-full text-[8px] font-black shadow-xs border flex items-center gap-0.5 ${
                   isRevoked
                     ? 'bg-rose-600 text-white border-rose-300'
                     : isApproved 
@@ -228,7 +230,7 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
             </div>
 
             {/* Category Ribbon Under Photo */}
-            <div className={`mt-1 py-0.5 px-2.5 rounded-md font-black text-[9.5px] shadow-xs flex items-center gap-1 text-white shrink-0 ${
+            <div className={`mt-0.5 py-0.5 px-2 rounded font-black text-[8.5px] shadow-xs flex items-center gap-1 text-white shrink-0 ${
               isRevoked ? 'bg-slate-800' : `bg-gradient-to-r ${roleBadge.color}`
             }`}>
               {roleBadge.icon}
@@ -236,43 +238,43 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
             </div>
 
             {/* Journalist Full Name - Crisp Solid Black */}
-            <h3 className="text-[15px] font-black text-black mt-1 mb-0.5 tracking-tight line-clamp-1">
+            <h3 className="text-[13.5px] font-black text-black mt-0.5 mb-0.5 tracking-tight line-clamp-1">
               {fullName}
             </h3>
 
             {/* Media Outlet Name - Dark & Solid */}
-            <div className={`text-xs font-black mb-1 flex items-center gap-1 line-clamp-1 ${
+            <div className={`text-[10.5px] font-black mb-1 flex items-center gap-1 line-clamp-1 ${
               isRevoked ? 'text-rose-700' : 'text-black'
             }`}>
               <span>{mediaOutlet}</span>
-              <span className="text-[10px] font-bold text-black">({outletType})</span>
+              <span className="text-[9px] font-bold text-black">({outletType})</span>
             </div>
 
             {/* Accreditation Info Box (Solid Dark Text & High Contrast) */}
-            <div className={`w-full rounded-xl p-2 text-right space-y-1 border ${
+            <div className={`w-full rounded-lg p-1.5 text-right space-y-0.5 border ${
               isRevoked
                 ? 'bg-rose-50 border-rose-300 text-black'
                 : 'bg-slate-50 border-slate-300 text-black'
             }`}>
-              <div className="flex items-center justify-between text-xs border-b border-slate-300/80 pb-0.5">
-                <span className="text-black font-bold text-[10px]">رقم الاعتماد الصحفي:</span>
-                <span className={`font-mono font-black tracking-wide text-xs ${
+              <div className="flex items-center justify-between text-[9px] border-b border-slate-300/80 pb-0.5">
+                <span className="text-black font-bold">رقم الاعتماد الصحفي:</span>
+                <span className={`font-mono font-black tracking-wide text-[9.5px] ${
                   isRevoked ? 'text-rose-600 line-through' : 'text-black'
                 }`}>
                   {accreditationCode}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-black font-bold text-[10px]">المسابقات المعتمدة:</span>
-                <span className="text-black text-[10px] font-black">
+              <div className="flex items-center justify-between text-[9px]">
+                <span className="text-black font-bold">المسابقات المعتمدة:</span>
+                <span className="text-black text-[9px] font-black">
                   جميع المسابقات الرسمية
                 </span>
               </div>
 
-              <div className="flex items-center justify-between text-xs border-t border-slate-300/80 pt-0.5">
-                <span className="text-black font-bold text-[10px]">صلاحية وسريان البطاقة:</span>
-                <span className={`text-[10px] font-black ${
+              <div className="flex items-center justify-between text-[9px] border-t border-slate-300/80 pt-0.5">
+                <span className="text-black font-bold">صلاحية وسريان البطاقة:</span>
+                <span className={`text-[9px] font-black ${
                   isRevoked ? 'text-rose-600' : 'text-emerald-800'
                 }`}>
                   {isRevoked ? 'ملغاة ومسحوبة بقرار الاتحاد' : `حتى ${expiryDate || 'نهاية موسم 2026 / 2027'}`}
@@ -281,20 +283,20 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
             </div>
 
             {/* Stadium Access Zones in Arabic */}
-            <div className="w-full mt-1.5">
-              <span className="text-[9px] text-black font-black block text-right mb-0.5">
+            <div className="w-full mt-1">
+              <span className="text-[8.5px] text-black font-black block text-right mb-0.5">
                 أماكن تواجد الإعلامي المصرحة:
               </span>
               <div className="flex flex-wrap gap-1 justify-center">
                 {isRevoked ? (
-                  <span className="text-[9px] font-black px-2.5 py-0.5 rounded-md bg-rose-100 text-rose-900 border border-rose-300">
+                  <span className="text-[8px] font-black px-2 py-0.5 rounded bg-rose-100 text-rose-900 border border-rose-300">
                     ✕ غير مصرح بالدخول (البطاقة مسحوبة)
                   </span>
                 ) : (
                   getZoneChips().map((zone, idx) => (
                     <span 
                       key={idx}
-                      className="text-[9px] font-black px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-950 border border-emerald-400 shadow-xs"
+                      className="text-[8px] font-black px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-950 border border-emerald-400 shadow-xs"
                     >
                       ✓ {zone}
                     </span>
@@ -307,85 +309,89 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
           {/* ================= FOOTER: QR CODE & DIGITAL VERIFICATION ================= */}
           <div className={`bg-slate-50 border-t ${
             isRevoked ? 'border-rose-300' : 'border-slate-300'
-          } px-3 py-2 flex items-center justify-between relative z-10 shrink-0`}>
-            <div className="text-right flex-1 pl-2">
-              <div className={`flex items-center gap-1 font-black text-[9.5px] mb-0.5 ${
+          } px-2.5 py-1.5 flex items-center justify-between relative z-10 shrink-0`}>
+            <div className="text-right flex-1 pl-1.5">
+              <div className={`flex items-center gap-1 font-black text-[9px] mb-0.5 ${
                 isRevoked ? 'text-rose-700' : 'text-black'
               }`}>
                 {isRevoked ? (
-                  <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                  <AlertCircle className="w-3 h-3 text-rose-600 shrink-0" />
                 ) : (
-                  <Award className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                  <Award className="w-3 h-3 text-amber-600 shrink-0" />
                 )}
                 <span>{isRevoked ? '⚠️ بطاقة مسحوبة وملغاة رسمياً' : 'الوثيقة الرسمية الإلكترونية المعتمدة'}</span>
               </div>
-              <p className={`text-[8.5px] leading-tight ${isRevoked ? 'text-rose-700 font-bold' : 'text-black font-bold'}`}>
-                {isRevoked ? 'تم إيقاف صلاحية الدخول بقرار الاتحاد' : 'امسح الرمز للتحقق الفوري من صحة وسريان البطاقة'}
+              <p className={`text-[8px] leading-tight ${isRevoked ? 'text-rose-700 font-bold' : 'text-black font-bold'}`}>
+                {isRevoked ? 'تم إيقاف صلاحية الدخول بقرار الاتحاد' : 'امسح الرمز للتحقق الفوري من سريان البطاقة'}
               </p>
-              <span className={`text-[8.5px] font-black block mt-0.5 ${
+              <span className={`text-[8px] font-black block mt-0.5 ${
                 isRevoked ? 'text-rose-700' : 'text-black'
               }`}>
-                الاتحاد الليبي لكرة القدم • طرابلس - ليبيا
+                الاتحاد الليبي لكرة القدم • طرابلس
               </span>
             </div>
 
             {/* High Contrast QR Code */}
-            <div className={`w-12 h-12 bg-white p-0.5 rounded-lg shadow-sm border flex items-center justify-center shrink-0 ${
+            <div className={`w-11 h-11 bg-white p-0.5 rounded-lg shadow-xs border flex items-center justify-center shrink-0 ${
               isRevoked ? 'border-rose-400' : 'border-slate-400'
             }`}>
               {qrSrc ? (
                 <img src={qrSrc} alt="رمز التحقق" className="w-full h-full object-contain" />
               ) : (
-                <QrIcon className="w-8 h-8 text-black" />
+                <QrIcon className="w-7 h-7 text-black" />
               )}
             </div>
           </div>
         </div>
       ) : (
         /* ======================================================== */
-        /* CARD BACK SIDE (WHITE BACKGROUND - REGULATIONS & DATA) */
+        /* CARD BACK SIDE (EXACT 9cm x 13cm - WHITE BACKGROUND) */
         /* ======================================================== */
         <div 
-          className={`w-[325px] h-[580px] rounded-[26px] overflow-hidden relative flex flex-col justify-between bg-white text-black shadow-xl transition-all border-2 p-3.5 text-right text-xs ${
+          className={`rounded-[20px] overflow-hidden relative flex flex-col justify-between bg-white text-black shadow-xl transition-all border-2 p-3 text-right text-xs ${
             isRevoked ? 'border-rose-600' : 'border-emerald-700'
           }`}
+          style={{
+            width: '9cm',
+            height: '13cm'
+          }}
         >
           {/* Lanyard Slot */}
-          <div className="pt-0 pb-1 flex justify-center shrink-0">
-            <div className={`w-14 h-2 bg-slate-200 rounded-full border ${
+          <div className="pt-0.5 pb-0.5 flex justify-center shrink-0">
+            <div className={`w-12 h-1.5 bg-slate-200 rounded-full border ${
               isRevoked ? 'border-rose-300' : 'border-slate-400'
             }`}></div>
           </div>
 
           {/* Header Back */}
-          <div className="text-center border-b border-slate-300 pb-1 shrink-0">
-            <h4 className="text-[15px] font-black text-black">
+          <div className="text-center border-b border-slate-300 pb-0.5 shrink-0">
+            <h4 className="text-[14px] font-black text-black">
               الاتحاد الليبي لكرة القدم
             </h4>
-            <p className="text-[10px] font-bold text-black">الضوابط والتعليمات الرسمية لحاملي بطاقات الاعتماد</p>
+            <p className="text-[9px] font-bold text-black">الضوابط والتعليمات الرسمية لحاملي بطاقات الاعتماد</p>
           </div>
 
           {/* Warning Badge if Revoked */}
           {isRevoked && (
-            <div className="p-1.5 rounded-xl bg-rose-600 text-white text-center font-bold text-[10px] shadow border border-rose-700 shrink-0 my-0.5">
+            <div className="p-1 rounded-lg bg-rose-600 text-white text-center font-bold text-[9px] shadow border border-rose-700 shrink-0 my-0.5">
               ⛔ إشعار سحب: تم سحب هذه البطاقة رسمياً ويحظر استخدامها في كافة الملاعب
             </div>
           )}
 
           {/* Security Hologram Strip */}
-          <div className="h-6 rounded-md bg-gradient-to-r from-amber-100 via-amber-200 to-emerald-100 border border-amber-300 flex items-center justify-center my-1 shrink-0">
-            <span className="text-[9px] font-black text-black tracking-wide">
+          <div className="h-5 rounded bg-gradient-to-r from-amber-100 via-amber-200 to-emerald-100 border border-amber-300 flex items-center justify-center my-0.5 shrink-0">
+            <span className="text-[8.5px] font-black text-black tracking-wide">
               ★ الاتحاد الليبي لكرة القدم • شريط الأمان والتوثيق الرسمي ★
             </span>
           </div>
 
           {/* Instructions and Terms in 100% Arabic & Solid Crisp Black */}
-          <div className="space-y-1 text-[9.5px] leading-relaxed text-black bg-slate-50 p-2.5 rounded-xl border border-slate-300 flex-1 my-1 justify-center flex flex-col">
-            <h5 className="font-black text-black text-[10.5px] border-b border-slate-300 pb-1 mb-1">
+          <div className="space-y-1 text-[8.5px] leading-tight text-black bg-slate-50 p-2 rounded-lg border border-slate-300 flex-1 my-0.5 justify-center flex flex-col">
+            <h5 className="font-black text-black text-[9.5px] border-b border-slate-300 pb-0.5 mb-0.5">
               ضوابط وتعليمات استخدام البطاقة:
             </h5>
-            <ul className="list-disc list-inside space-y-1 text-black font-semibold">
-              <li>هذه البطاقة وثيقة رسمية مخصصة لحاملها فقط ولا يجوز إعارتها أو التنازل عنها للغير.</li>
+            <ul className="list-disc list-inside space-y-0.5 text-black font-semibold">
+              <li>هذه البطاقة وثيقة رسمية مخصصة لحاملها فقط ولا يجوز إعارتها أو التنازل عنها.</li>
               <li>يجب إبراز البطاقة وتعليقها على الصدر طوال فترة التواجد بالملاعب.</li>
               <li>تخول البطاقة حاملها التواجد فقط في الأماكن المحددة (المنصة - المركز الإعلامي - أرضية الملعب للمصورين).</li>
               <li className="font-black text-black">يسمح للمراسلين التواجد بأرضية الملعب بعد صافرة نهاية المباراة.</li>
@@ -395,35 +401,35 @@ export default function PressCard({ journalist, showBack = false, scale = 1, isP
           </div>
 
           {/* Medical & Emergency info */}
-          <div className="bg-slate-50 border border-slate-300 rounded-xl p-2 grid grid-cols-2 gap-2 text-[9.5px] shrink-0 mb-1">
+          <div className="bg-slate-50 border border-slate-300 rounded-lg p-1.5 grid grid-cols-2 gap-1.5 text-[8.5px] shrink-0 mb-0.5">
             <div>
-              <span className="text-black font-bold block text-[9px]">فصيلة الدم للطوارئ:</span>
-              <span className="font-mono font-black text-rose-600 text-xs">{bloodType}</span>
+              <span className="text-black font-bold block text-[8px]">فصيلة الدم للطوارئ:</span>
+              <span className="font-mono font-black text-rose-600 text-[11px]">{bloodType}</span>
             </div>
             <div>
-              <span className="text-black font-bold block text-[9px]">طوارئ الملاعب والإسعاف:</span>
-              <span className="font-mono font-black text-black text-xs">191 / 193</span>
+              <span className="text-black font-bold block text-[8px]">طوارئ الملاعب والإسعاف:</span>
+              <span className="font-mono font-black text-black text-[11px]">191 / 193</span>
             </div>
           </div>
 
           {/* Barcode & Official Digital Signature */}
           <div className="border-t border-slate-300 pt-1 flex items-center justify-between shrink-0">
             <div className="text-right">
-              <span className="text-[8.5px] text-black font-bold block">الختم الرقمي والتوقيع:</span>
-              <div className="text-black text-[9.5px] font-black flex items-center gap-1 mt-0.5">
-                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+              <span className="text-[7.5px] text-black font-bold block">الختم الرقمي والتوقيع:</span>
+              <div className="text-black text-[8.5px] font-black flex items-center gap-1 mt-0.5">
+                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
                 <span>معتمد من الأمانة العامة للاتحاد</span>
               </div>
             </div>
 
             {/* Barcode pattern */}
             <div className="flex flex-col items-end">
-              <div className="flex gap-0.5 h-6 items-center bg-white px-1.5 py-0.5 rounded border border-slate-400">
+              <div className="flex gap-0.5 h-5 items-center bg-white px-1.5 py-0.5 rounded border border-slate-400">
                 {[2, 1, 3, 1, 2, 4, 1, 3, 2, 1, 2, 3, 1, 4, 2].map((w, i) => (
                   <div key={i} className="bg-black h-full" style={{ width: `${w}px` }}></div>
                 ))}
               </div>
-              <span className="text-[8.5px] font-mono text-black font-bold mt-0.5">{accreditationCode}</span>
+              <span className="text-[7.5px] font-mono text-black font-bold mt-0.5">{accreditationCode}</span>
             </div>
           </div>
         </div>
