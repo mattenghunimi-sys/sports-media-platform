@@ -30,9 +30,17 @@ import {
   UserPlus,
   Lock,
   Ban,
-  AlertTriangle
+  AlertTriangle,
+  RotateCw,
+  Maximize2,
+  FileCheck2,
+  Camera,
+  MapPin,
+  Mail,
+  Phone
 } from 'lucide-react';
 import LFFLogo from '@/components/LFFLogo';
+import PressCard from '@/components/PressCard';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -58,6 +66,8 @@ export default function AdminPage() {
   // Selected journalist for details modal
   const [activeModal, setActiveModal] = useState(null);
   const [modalLoading, setModalLoading] = useState(false);
+  const [modalCardSide, setModalCardSide] = useState('front');
+  const [fullscreenDoc, setFullscreenDoc] = useState(null);
   const [reviewNotes, setReviewNotes] = useState('');
   const [selectedZones, setSelectedZones] = useState('المنصة • المركز الإعلامي');
   const [processingId, setProcessingId] = useState(null);
@@ -90,6 +100,7 @@ export default function AdminPage() {
     setActiveModal(j);
     setReviewNotes(j.reviewNotes || '');
     setSelectedZones(j.zoneAccess || 'المنصة • المركز الإعلامي');
+    setModalCardSide('front');
 
     if (!j.documentUrl || !j.photoUrl) {
       setModalLoading(true);
@@ -1026,202 +1037,404 @@ export default function AdminPage() {
       )}
 
       {/* ======================================================== */}
-      {/* REVIEW & APPROVAL MODAL (FOR JOURNALISTS) */}
+      {/* REVIEW & APPROVAL MODAL (ALL DATA + LIVE CARD PREVIEW) */}
       {/* ======================================================== */}
       {activeModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-xl w-full shadow-2xl relative">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-in fade-in">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-6xl w-full max-h-[94vh] shadow-2xl flex flex-col overflow-hidden relative">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-800 p-4 sm:px-6 bg-slate-950/60 shrink-0">
               <div className="flex items-center gap-3">
                 <img
                   src={activeModal.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
                   alt={activeModal.fullName}
-                  className="w-12 h-12 rounded-xl object-cover border border-emerald-500"
+                  className="w-12 h-12 rounded-xl object-cover border-2 border-emerald-500 shadow-md"
                 />
                 <div>
-                  <h3 className="text-base font-bold text-white">{activeModal.fullName}</h3>
-                  <p className="text-xs text-emerald-400">{activeModal.mediaOutlet} • {activeModal.role}</p>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base sm:text-lg font-black text-white">{activeModal.fullName}</h3>
+                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                      activeModal.status === 'APPROVED' 
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' 
+                        : activeModal.status === 'REVOKED'
+                        ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                        : activeModal.status === 'REJECTED'
+                        ? 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+                        : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                    }`}>
+                      {activeModal.status === 'APPROVED' ? 'معتمد رسمياً' : activeModal.status === 'REVOKED' ? 'البطاقة مسحوبة' : activeModal.status === 'REJECTED' ? 'مرفوض' : 'قيد المراجعة'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-emerald-400 font-semibold">{activeModal.mediaOutlet} • {activeModal.role}</p>
                 </div>
               </div>
-              <button
-                onClick={() => setActiveModal(null)}
-                className="text-slate-400 hover:text-white text-lg p-1"
-              >
-                ✕
-              </button>
+
+              <div className="flex items-center gap-3">
+                <span className="hidden sm:inline-block font-mono text-xs bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 text-slate-300">
+                  كود: {activeModal.accreditationCode}
+                </span>
+                <button
+                  onClick={() => setActiveModal(null)}
+                  className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-slate-950 border border-slate-800">
-                <div>
-                  <span className="text-slate-400 block">رقم الهوية / جواز السفر:</span>
-                  <span className="font-mono text-white font-bold">{activeModal.nationalId}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block">رقم الهاتف:</span>
-                  <span className="font-mono text-white">{activeModal.phone}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block">البريد الإلكتروني:</span>
-                  <span className="text-white">{activeModal.email || 'غير مدخل'}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block">فصيلة الدم:</span>
-                  <span className="text-rose-400 font-mono font-bold">{activeModal.bloodType}</span>
-                </div>
-                <div className="col-span-2 pt-2 border-t border-slate-800/80 flex justify-between items-center">
-                  <span className="text-slate-400">المسابقات المعتمدة:</span>
-                  <span className="text-emerald-400 font-bold">{activeModal.coverageType || 'جميع المسابقات الرسمية'}</span>
-                </div>
-              </div>
-
-              {/* Uploaded Assignment Document Preview */}
-              <div>
-                <label className="block text-slate-300 font-bold mb-1.5 flex items-center justify-between">
-                  <span>خطاب تكليف المؤسسة أو بطاقة العمل الإعلامي المرفوعة:</span>
-                  {modalLoading ? (
-                    <span className="text-[10px] text-amber-400 font-semibold animate-pulse">⏳ جاري تحميل الوثيقة...</span>
-                  ) : activeModal.documentUrl ? (
-                    <span className="text-[10px] text-emerald-400 font-semibold">✓ تم إرفاق الوثيقة</span>
-                  ) : (
-                    <span className="text-[10px] text-amber-400 font-semibold">بانتظار تدقيق الوثيقة</span>
-                  )}
-                </label>
-                {activeModal.documentUrl ? (
-                  <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-3">
-                    <img
-                      src={activeModal.documentUrl}
-                      alt="وثيقة التكليف"
-                      className="w-16 h-16 rounded-lg object-cover border border-slate-700 shrink-0 cursor-pointer hover:border-emerald-500 transition-colors"
-                      onClick={() => window.open(activeModal.documentUrl, '_blank')}
-                      title="اضغط للتكبير"
-                    />
-                    <div className="flex-1">
-                      <span className="text-white font-semibold block text-[11px]">مستند التكليف الرسمي المرفوع مع الطلب</span>
-                      <a
-                        href={activeModal.documentUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[11px] text-emerald-400 hover:text-emerald-300 underline mt-1"
-                      >
-                        <span>عرض الوثيقة بالحجم الكامل في نافذة جديدة</span>
-                        ↗
-                      </a>
+            {/* Modal Body: Two Columns (Full Data on Right, Live Card Preview on Left) */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              
+              {/* Column 1: Full Journalist Data and Review Controls (7 cols) */}
+              <div className="lg:col-span-7 space-y-4">
+                
+                {/* 1. Personal & Contact Information */}
+                <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800">
+                  <h4 className="text-xs font-bold text-emerald-400 mb-3 flex items-center gap-1.5 border-b border-slate-800/80 pb-2">
+                    <User className="w-4 h-4 text-emerald-400" />
+                    <span>البيانات الشخصية وبيانات الاتصال</span>
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <span className="text-slate-400 block mb-0.5 text-[11px]">الاسم الرباعي الكامل:</span>
+                      <span className="font-bold text-white text-sm">{activeModal.fullName}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block mb-0.5 text-[11px]">الرقم الوطني / جواز السفر:</span>
+                      <span className="font-mono text-white font-bold bg-slate-900 px-2 py-0.5 rounded border border-slate-800 inline-block">
+                        {activeModal.nationalId || 'غير مدخل'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block mb-0.5 text-[11px]">رقم الهاتف المحمول:</span>
+                      <span className="font-mono text-white font-semibold flex items-center gap-1">
+                        <Phone className="w-3 h-3 text-slate-500" />
+                        <span dir="ltr">{activeModal.phone}</span>
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block mb-0.5 text-[11px]">البريد الإلكتروني:</span>
+                      <span className="text-slate-300 font-mono text-[11px] truncate block">
+                        {activeModal.email || 'غير مدخل'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block mb-0.5 text-[11px]">المدينة والدولة:</span>
+                      <span className="text-white font-medium flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-slate-500" />
+                        <span>{activeModal.city || 'طرابلس'} • {activeModal.country || 'ليبيا'}</span>
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block mb-0.5 text-[11px]">فصيلة الدم للطوارئ:</span>
+                      <span className="text-rose-400 font-mono font-black text-sm">{activeModal.bloodType || 'O+'}</span>
                     </div>
                   </div>
-                ) : (
-                  <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 text-[11px] text-center">
-                    لم يتم إرفاق وثيقة إلكترونية (طلب ورقي)
+                </div>
+
+                {/* 2. Professional & Outlet Details */}
+                <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800">
+                  <h4 className="text-xs font-bold text-teal-400 mb-3 flex items-center gap-1.5 border-b border-slate-800/80 pb-2">
+                    <Building2 className="w-4 h-4 text-teal-400" />
+                    <span>البيانات المهنية وتفاصيل المؤسسة</span>
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <span className="text-slate-400 block mb-0.5 text-[11px]">المؤسسة الإعلامية:</span>
+                      <span className="font-bold text-white">{activeModal.mediaOutlet}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block mb-0.5 text-[11px]">نوع وتصنيف المؤسسة:</span>
+                      <span className="text-slate-300">{activeModal.outletType}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block mb-0.5 text-[11px]">الصفة الصحفية / المهمة:</span>
+                      <span className="text-emerald-400 font-bold">{activeModal.role}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block mb-0.5 text-[11px]">سنوات الخبرة الصحفية:</span>
+                      <span className="text-slate-300">{activeModal.experienceYears || '3'} سنوات</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block mb-0.5 text-[11px]">رقم القيد الصحفي / الهيئة:</span>
+                      <span className="font-mono text-slate-300">{activeModal.syndicateNumber || 'غير متوفر'}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block mb-0.5 text-[11px]">المسابقات المعتمدة:</span>
+                      <span className="text-emerald-400 font-black">جميع المسابقات الرسمية</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Uploaded Documents Preview (Photo & Assignment Letter) */}
+                <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800">
+                  <h4 className="text-xs font-bold text-amber-400 mb-3 flex items-center justify-between border-b border-slate-800/80 pb-2">
+                    <span className="flex items-center gap-1.5">
+                      <FileCheck2 className="w-4 h-4 text-amber-400" />
+                      <span>المستندات والوثائق المرفوعة مع الطلب</span>
+                    </span>
+                    {modalLoading && (
+                      <span className="text-[10px] text-amber-400 font-semibold animate-pulse">⏳ جاري التحميل...</span>
+                    )}
+                  </h4>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    {/* Photo Box */}
+                    <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-3">
+                      <img
+                        src={activeModal.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
+                        alt={activeModal.fullName}
+                        className="w-14 h-16 rounded-lg object-cover border border-slate-700 shrink-0 cursor-pointer hover:opacity-90"
+                        onClick={() => activeModal.photoUrl && setFullscreenDoc({ url: activeModal.photoUrl, title: `الصورة الشخصية: ${activeModal.fullName}` })}
+                      />
+                      <div>
+                        <span className="text-white font-bold block text-[11px]">الصورة الشخصية</span>
+                        <span className="text-slate-400 text-[10px] block">الصورة المعتمدة للبطاقة</span>
+                        {activeModal.photoUrl && (
+                          <button
+                            type="button"
+                            onClick={() => setFullscreenDoc({ url: activeModal.photoUrl, title: `الصورة الشخصية: ${activeModal.fullName}` })}
+                            className="text-emerald-400 hover:text-emerald-300 text-[10px] font-bold mt-1 inline-flex items-center gap-1"
+                          >
+                            <Maximize2 className="w-3 h-3" />
+                            <span>تكبير الصورة</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Assignment Document Box */}
+                    <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-3">
+                      {activeModal.documentUrl ? (
+                        <>
+                          <img
+                            src={activeModal.documentUrl}
+                            alt="وثيقة التكليف"
+                            className="w-14 h-16 rounded-lg object-cover border border-slate-700 shrink-0 cursor-pointer hover:border-emerald-500 transition-colors"
+                            onClick={() => setFullscreenDoc({ url: activeModal.documentUrl, title: `خطاب التكليف: ${activeModal.fullName} (${activeModal.mediaOutlet})` })}
+                          />
+                          <div className="flex-1">
+                            <span className="text-white font-bold block text-[11px]">خطاب التكليف / البطاقة</span>
+                            <span className="text-slate-400 text-[10px] block">المستند الرسمي المرفق</span>
+                            <button
+                              type="button"
+                              onClick={() => setFullscreenDoc({ url: activeModal.documentUrl, title: `خطاب التكليف: ${activeModal.fullName} (${activeModal.mediaOutlet})` })}
+                              className="text-teal-400 hover:text-teal-300 text-[10px] font-bold mt-1 inline-flex items-center gap-1"
+                            >
+                              <Maximize2 className="w-3 h-3" />
+                              <span>تكبير الوثيقة</span>
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="w-full text-center py-2 text-slate-500 text-[11px]">
+                          لم يتم إرفاق وثيقة إلكترونية
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. Stadium Access Zones Multi-selection */}
+                <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-slate-200 font-bold text-xs">
+                      تحديد أماكن تواجد وتصريح الإعلامي في الملاعب:
+                    </label>
+                    <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/40">
+                      {AVAILABLE_ZONES.filter(z => isZoneActive(z)).join(' • ') || 'المركز الإعلامي'}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {AVAILABLE_ZONES.map((zone) => {
+                      const active = isZoneActive(zone);
+                      return (
+                        <button
+                          key={zone}
+                          type="button"
+                          onClick={() => handleToggleZone(zone)}
+                          className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center justify-center gap-1.5 ${
+                            active
+                              ? 'bg-emerald-950/70 border-emerald-500 text-white shadow-sm'
+                              : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                          }`}
+                        >
+                          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
+                            active ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-500 border border-slate-700'
+                          }`}>
+                            {active ? '✓' : '+'}
+                          </div>
+                          <span className="font-bold text-xs">{zone}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1.5">
+                    الأماكن المختارة تظهر وتنعكس فوراً على معاينة البطاقة المقابلة.
+                  </p>
+                </div>
+
+                {/* 5. Review Notes */}
+                <div>
+                  <label className="block text-slate-300 font-bold mb-1.5 text-xs">
+                    ملاحظات الاعتماد والقرار الإداري:
+                  </label>
+                  <textarea
+                    rows="2"
+                    value={reviewNotes}
+                    onChange={(e) => setReviewNotes(e.target.value)}
+                    placeholder="ملاحظات الاعتماد الإدارية..."
+                    className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl p-3 text-white text-xs outline-none"
+                  />
+                </div>
+
+                {/* 6. Approval Actions */}
+                <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                  <button
+                    disabled={processingId !== null}
+                    onClick={() => handleUpdateStatus(activeModal.id, 'APPROVED')}
+                    className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all disabled:opacity-50"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>اعتماد وإصدار البطاقة الرسمية</span>
+                  </button>
+
+                  <button
+                    disabled={processingId !== null}
+                    onClick={() => handleUpdateStatus(activeModal.id, 'REJECTED')}
+                    className="py-3 px-4 rounded-xl bg-rose-600/20 hover:bg-rose-600 border border-rose-500/40 text-rose-300 hover:text-white font-bold text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                  >
+                    <XCircle className="w-4 h-4" />
+                    <span>رفض الطلب</span>
+                  </button>
+                </div>
+
+                {/* Revoke / Unrevoke for APPROVED or REVOKED */}
+                {(activeModal.status === 'APPROVED' || activeModal.status === 'REVOKED') && (
+                  <div className={`mt-1 p-3 rounded-xl border ${
+                    activeModal.status === 'REVOKED'
+                      ? 'bg-orange-950/30 border-orange-500/30'
+                      : 'bg-slate-950 border-slate-800'
+                  }`}>
+                    <p className="text-[11px] text-slate-400 mb-2 font-semibold">
+                      {activeModal.status === 'REVOKED' ? '⛔ البطاقة حالياً مسحوبة — يمكن استعادة صلاحيتها:' : '⚠️ إجراء سحب بطاقة الاعتماد:'}
+                    </p>
+                    {activeModal.status === 'REVOKED' ? (
+                      <button
+                        disabled={processingId !== null}
+                        onClick={() => handleUpdateStatus(activeModal.id, 'APPROVED')}
+                        className="w-full py-2 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-600 border border-emerald-500/50 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all"
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>إلغاء السحب واستعادة صلاحية البطاقة</span>
+                      </button>
+                    ) : (
+                      <button
+                        disabled={processingId !== null}
+                        onClick={() => {
+                          if (confirm(`هل أنت متأكد من سحب بطاقة اعتماد (${activeModal.fullName})؟ ستوقف صلاحيتها فوراً.`)) {
+                            handleUpdateStatus(activeModal.id, 'REVOKED');
+                          }
+                        }}
+                        className="w-full py-2 px-4 rounded-xl bg-orange-700/40 hover:bg-orange-700 border border-orange-500/40 text-orange-300 hover:text-white font-bold text-xs flex items-center justify-center gap-2 transition-all"
+                      >
+                        <Ban className="w-4 h-4" />
+                        <span>سحب بطاقة الاعتماد وإيقاف الصلاحية</span>
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-slate-200 font-bold text-xs">
-                    تحديد أماكن تواجد وتصريح الإعلامي في الملاعب:
-                  </label>
-                  <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/40">
-                    {AVAILABLE_ZONES.filter(z => isZoneActive(z)).join(' • ') || 'المركز الإعلامي'}
-                  </span>
+              {/* Column 2: Live Card Preview Before Approval (5 cols) */}
+              <div className="lg:col-span-5 flex flex-col items-center bg-slate-950/60 p-4 rounded-3xl border border-slate-800 sticky top-0">
+                <div className="w-full flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+                  <div className="text-right">
+                    <h4 className="text-xs font-black text-white flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                      <span>معاينة البطاقة قبل الاعتماد</span>
+                    </h4>
+                    <span className="text-[10px] text-slate-400">تحديث حي ومباشر لكافة الحقول</span>
+                  </div>
+
+                  {/* Card Flip & Controls */}
+                  <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
+                    <button
+                      type="button"
+                      onClick={() => setModalCardSide('front')}
+                      className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                        modalCardSide === 'front'
+                          ? 'bg-emerald-600 text-white shadow-sm'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      الوجه الأمامي
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setModalCardSide('back')}
+                      className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                        modalCardSide === 'back'
+                          ? 'bg-emerald-600 text-white shadow-sm'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      الوجه الخلفي
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setModalCardSide(modalCardSide === 'front' ? 'back' : 'front')}
+                      className="p-1 rounded-lg text-slate-400 hover:text-white"
+                      title="قلب وجه البطاقة"
+                    >
+                      <RotateCw className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {AVAILABLE_ZONES.map((zone) => {
-                    const active = isZoneActive(zone);
-                    return (
-                      <button
-                        key={zone}
-                        type="button"
-                        onClick={() => handleToggleZone(zone)}
-                        className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center justify-center gap-1.5 ${
-                          active
-                            ? 'bg-emerald-950/70 border-emerald-500 text-white shadow-sm'
-                            : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
-                        }`}
-                      >
-                        <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
-                          active ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-500 border border-slate-700'
-                        }`}>
-                          {active ? '✓' : '+'}
-                        </div>
-                        <span className="font-bold text-xs">{zone}</span>
-                      </button>
-                    );
-                  })}
+
+                {/* The Live Press Card with Live Updates */}
+                <div className="p-2 sm:p-3 rounded-2xl bg-white/5 border border-slate-800 shadow-2xl flex justify-center w-full">
+                  <PressCard 
+                    journalist={{
+                      ...activeModal,
+                      zoneAccess: selectedZones,
+                      coverageType: 'جميع المسابقات الرسمية'
+                    }} 
+                    showBack={modalCardSide === 'back'} 
+                    scale={0.88} 
+                  />
                 </div>
-                <p className="text-[10px] text-slate-500 mt-1.5">
-                  انقر على الأماكن المسموح بتواجد الإعلامي فيها لتفعيلها أو إلغائها فورياً.
+
+                <p className="text-[10.5px] text-slate-500 mt-3 text-center">
+                  هذه المعاينة توضح تماماً كيف ستبدو البطاقة الرسمية المعتمدة للإعلامي عند الطباعة أو التحقق الإلكتروني.
                 </p>
               </div>
 
-              <div>
-                <label className="block text-slate-300 font-bold mb-1.5">
-                  ملاحظات الاعتماد والقرار:
-                </label>
-                <textarea
-                  rows="3"
-                  value={reviewNotes}
-                  onChange={(e) => setReviewNotes(e.target.value)}
-                  placeholder="ملاحظات الاعتماد تظهر في السجل الرسمي..."
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl p-3 text-white outline-none"
-                />
-              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-              <div className="pt-2 flex flex-col sm:flex-row gap-3">
-                <button
-                  disabled={processingId !== null}
-                  onClick={() => handleUpdateStatus(activeModal.id, 'APPROVED')}
-                  className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>اعتماد وإصدار البطاقة الرسمية</span>
-                </button>
-
-                <button
-                  disabled={processingId !== null}
-                  onClick={() => handleUpdateStatus(activeModal.id, 'REJECTED')}
-                  className="py-3 px-4 rounded-xl bg-rose-600/20 hover:bg-rose-600 border border-rose-500/40 text-rose-300 hover:text-white font-bold text-xs flex items-center justify-center gap-2 transition-all"
-                >
-                  <XCircle className="w-4 h-4" />
-                  <span>رفض الطلب</span>
-                </button>
-              </div>
-
-              {/* Revoke / Unrevoke — only show for APPROVED or REVOKED */}
-              {(activeModal.status === 'APPROVED' || activeModal.status === 'REVOKED') && (
-                <div className={`mt-1 p-3 rounded-xl border ${
-                  activeModal.status === 'REVOKED'
-                    ? 'bg-orange-950/30 border-orange-500/30'
-                    : 'bg-slate-950 border-slate-800'
-                }`}>
-                  <p className="text-[11px] text-slate-400 mb-2 font-semibold">
-                    {activeModal.status === 'REVOKED' ? '⛔ البطاقة حالياً مسحوبة — يمكن إلغاء السحب:' : '⚠️ إجراء سحب بطاقة الاعتماد:'}
-                  </p>
-                  {activeModal.status === 'REVOKED' ? (
-                    <button
-                      disabled={processingId !== null}
-                      onClick={() => handleUpdateStatus(activeModal.id, 'APPROVED')}
-                      className="w-full py-2.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-600 border border-emerald-500/50 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all"
-                    >
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span>إلغاء السحب واستعادة صلاحية البطاقة</span>
-                    </button>
-                  ) : (
-                    <button
-                      disabled={processingId !== null}
-                      onClick={() => {
-                        if (confirm(`هل أنت متأكد من سحب بطاقة اعتماد (${activeModal.fullName})؟ ستوقف صلاحيتها فوراً.`)) {
-                          handleUpdateStatus(activeModal.id, 'REVOKED');
-                        }
-                      }}
-                      className="w-full py-2.5 px-4 rounded-xl bg-orange-700/40 hover:bg-orange-700 border border-orange-500/40 text-orange-300 hover:text-white font-bold text-xs flex items-center justify-center gap-2 transition-all"
-                    >
-                      <Ban className="w-4 h-4" />
-                      <span>سحب بطاقة الاعتماد وإيقاف الصلاحية</span>
-                    </button>
-                  )}
-                </div>
-              )}
+      {/* FULLSCREEN LIGHTBOX FOR ATTACHED DOCUMENTS */}
+      {fullscreenDoc && (
+        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
+          <div className="relative max-w-4xl w-full max-h-[90vh] bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-950">
+              <span className="font-bold text-white text-sm">{fullscreenDoc.title}</span>
+              <button
+                onClick={() => setFullscreenDoc(null)}
+                className="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-4 overflow-auto flex items-center justify-center bg-slate-950/60 min-h-[60vh]">
+              <img
+                src={fullscreenDoc.url}
+                alt="المستند بالحجم الكامل"
+                className="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl border border-slate-800"
+              />
             </div>
           </div>
         </div>
